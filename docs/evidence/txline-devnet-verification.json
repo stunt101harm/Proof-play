@@ -1,0 +1,38 @@
+{
+  "verifiedAt": "2026-07-17T20:36:48.675Z",
+  "network": "devnet",
+  "apiOrigin": "https://txline-dev.txodds.com",
+  "programId": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J",
+  "tokenMint": "4Zao8ocPhmMgq7PdsYWyxvqySMGx7xb9cMftPMkEokRG",
+  "walletPublicKey": "3Ki9icB4a7J3GGYzMga1g42d9K2qgPpVPCXqb8x7yc35",
+  "fixtureSnapshot": {
+    "competitionId": 72,
+    "recordCount": 106
+  },
+  "odds": {
+    "fixtureId": 17588223,
+    "asOf": 1781830800000,
+    "recordCount": 29
+  },
+  "scoresSnapshot": {
+    "fixtureId": 18241006,
+    "recordCount": 37
+  },
+  "historicalScores": {
+    "fixtureId": 18241006,
+    "recordCount": 964,
+    "sequence": 963
+  },
+  "proof": {
+    "fixtureId": 18241006,
+    "sequence": 963,
+    "statKey": 1
+  },
+  "scoresSse": {
+    "connected": true
+  },
+  "credentialLifecycle": {
+    "guestJwtRenewed": true,
+    "apiTokenReused": true
+  }
+}

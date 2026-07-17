@@ -9,6 +9,7 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [MVP product specification](docs/product-spec.md)
 - [Domain and state model](docs/state-model.md)
 - [Judge demo script](docs/demo-script.md)
+- [TxLINE devnet runbook](docs/txline-devnet.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status
@@ -49,17 +50,22 @@ tooling                   Repository validation scripts
 
 ## Common commands
 
-| Command                 | Purpose                                       |
-| ----------------------- | --------------------------------------------- |
-| `npm run dev`           | Start the web app                             |
-| `npm run build`         | Build the deployable web worker               |
-| `npm run lint`          | Lint the web workspace                        |
-| `npm run typecheck`     | Typecheck every TypeScript workspace          |
-| `npm test`              | Check workspace boundaries and run unit tests |
-| `npm run test:rendered` | Verify the built app server-renders           |
-| `npm run anchor:build`  | Build the Anchor program                      |
-| `npm run anchor:test`   | Compile and test the Rust workspace           |
-| `npm run check`         | Run the complete local validation suite       |
+| Command                   | Purpose                                       |
+| ------------------------- | --------------------------------------------- |
+| `npm run dev`             | Start the web app                             |
+| `npm run build`           | Build the deployable web worker               |
+| `npm run lint`            | Lint the web workspace                        |
+| `npm run typecheck`       | Typecheck every TypeScript workspace          |
+| `npm test`                | Check workspace boundaries and run unit tests |
+| `npm run test:rendered`   | Verify the built app server-renders           |
+| `npm run txline:diagnose` | Check TxLINE devnet consistency and funding   |
+| `npm run txline:activate` | Subscribe and activate local TxLINE access    |
+| `npm run txline:recover`  | Recover activation for a confirmed subscribe  |
+| `npm run txline:renew`    | Renew the local guest JWT                     |
+| `npm run txline:verify`   | Exercise every required TxLINE data path      |
+| `npm run anchor:build`    | Build the Anchor program                      |
+| `npm run anchor:test`     | Compile and test the Rust workspace           |
+| `npm run check`           | Run the complete local validation suite       |
 
 ## Environment
 
