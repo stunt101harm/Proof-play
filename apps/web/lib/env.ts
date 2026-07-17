@@ -1,10 +1,12 @@
 import type { SolanaNetwork } from "@proof-play/domain";
 
 const DEFAULT_PROGRAM_ID = "AJwjCjk9sb9SWMiuLWDCDgnL6zFEENgnULfkCYaU5Ar";
+const DEFAULT_DEMO_TOKEN_MINT = "C6eDfhad3BqR99NxMyvhQf9EGqG9DSe71xVomb4u9H1w";
 
 type Environment = Partial<Record<string, string | undefined>>;
 
 type PublicEnv = {
+  demoTokenMint: string;
   proofPlayProgramId: string;
   solanaNetwork: SolanaNetwork;
   solanaRpcUrl: string;
@@ -34,6 +36,8 @@ export function readPublicEnv(
   }
 
   return {
+    demoTokenMint:
+      environment.NEXT_PUBLIC_DEMO_TOKEN_MINT ?? DEFAULT_DEMO_TOKEN_MINT,
     proofPlayProgramId:
       environment.NEXT_PUBLIC_PROOF_PLAY_PROGRAM_ID ?? DEFAULT_PROGRAM_ID,
     solanaNetwork: "devnet",

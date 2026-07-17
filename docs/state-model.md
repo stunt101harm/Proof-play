@@ -161,10 +161,12 @@ stateDiagram-v2
 type Pool = {
   address: string;
   creator: string;
+  poolId: bigint;
   fixtureId: string;
   conditionCommitment: string;
   compilerVersion: 1;
   cutoffUnixSeconds: number;
+  refundAfterUnixSeconds: number;
   tokenMint: string;
   yesAmount: bigint;
   noAmount: bigint;
@@ -172,16 +174,17 @@ type Pool = {
   remainingWinningStake: bigint;
   state:
     "open" | "locked" | "settledYes" | "settledNo" | "cancelled" | "closed";
+  winningSide?: "yes" | "no";
   settledSequence?: number;
-  settlementTransaction?: string;
+  demoMode: boolean;
 };
 ```
 
-The eventual Anchor account layout may use fixed-width integer/public-key fields, but it must preserve these semantics.
+Settlement transaction signatures are receipt/indexer data rather than fields in the Anchor account. The complete deployed account and instruction contract is documented in [ProofPlay pool program](pool-program.md).
 
 ## Position lifecycle
 
-One wallet has one aggregate position per pool and side in the MVP. If the program permits deposits on both sides, each side must use a distinct position PDA.
+One wallet has one aggregate position per pool in the MVP. Its first deposit fixes the side; subsequent deposits may only add to that same side. A participant that wants the opposite side must use a different wallet.
 
 | Position state | Meaning                                    |
 | -------------- | ------------------------------------------ |
@@ -198,7 +201,7 @@ Client-only `depositPending`, `claimPending`, and `refundPending` states wrap su
 
 Let:
 
-- `R` be the vault's remaining token balance.
+- `R` be the pool's recorded remaining token liability.
 - `W` be the remaining unclaimed winning stake.
 - `p` be the claimant's winning stake.
 
@@ -209,6 +212,8 @@ claim = floor(R * p / W)
 ```
 
 After payment, the program updates `R = R - claim` and `W = W - p`. The final valid claimant receives the exact remaining balance. This conserves all escrowed base units without a privileged dust sweep.
+
+The token vault must contain at least `R`, but raw vault balance is never used to calculate a claim. An external direct transfer therefore cannot inflate payouts.
 
 If the selected winning side has zero stake, the pool becomes refundable rather than assigning the losing side's funds to an operator.
 

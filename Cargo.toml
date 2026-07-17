@@ -3,7 +3,11 @@ members = ["programs/*"]
 resolver = "2"
 
 [workspace.dependencies]
-anchor-lang = "0.31.1"
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.31.1", default-features = false, features = [
+  "token",
+  "token_2022",
+] }
 
 [profile.release]
 overflow-checks = true

@@ -4,6 +4,7 @@ import { readPublicEnv, readTxlineServerEnv } from "../apps/web/lib/env";
 describe("environment validation", () => {
   it("provides safe devnet public defaults", () => {
     expect(readPublicEnv({})).toEqual({
+      demoTokenMint: "C6eDfhad3BqR99NxMyvhQf9EGqG9DSe71xVomb4u9H1w",
       proofPlayProgramId: "AJwjCjk9sb9SWMiuLWDCDgnL6zFEENgnULfkCYaU5Ar",
       solanaNetwork: "devnet",
       solanaRpcUrl: "https://api.devnet.solana.com/",

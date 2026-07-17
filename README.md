@@ -12,11 +12,12 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [TxLINE devnet runbook](docs/txline-devnet.md)
 - [Typed TxLINE adapter contract](docs/txline-adapter.md)
 - [Condition compiler v1](docs/condition-compiler.md)
+- [Anchor pool and escrow program](docs/pool-program.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status
 
-ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository now includes the implementation workspace, deployable web foundation, shared package boundaries, and Anchor program scaffold. Product features follow the child issues in the delivery epic.
+ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository includes the deployable web foundation, TxLINE adapter and condition compiler, plus a devnet Anchor program with SPL-token escrow, deterministic pari-mutuel claims, and cancellation refunds. Product features follow the child issues in the delivery epic.
 
 ## Prerequisites
 
@@ -67,6 +68,7 @@ tooling                   Repository validation scripts
 | `npm run txline:verify`   | Exercise every required TxLINE data path      |
 | `npm run anchor:build`    | Build the Anchor program                      |
 | `npm run anchor:test`     | Compile and test the Rust workspace           |
+| `npm run program:verify`  | Exercise the funded lifecycle on devnet       |
 | `npm run check`           | Run the complete local validation suite       |
 
 ## Environment

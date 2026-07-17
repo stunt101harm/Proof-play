@@ -17,7 +17,7 @@
     "build": "npm run build --workspace=@proof-play/web",
     "start": "npm run start --workspace=@proof-play/web",
     "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tsconfig.tooling.json",
     "test": "npm run workspace:check && npm run test:unit",
     "test:unit": "vitest run",
     "test:rendered": "npm run test:rendered --workspace=@proof-play/web",
@@ -33,9 +33,11 @@
     "txline:verify": "node --import tsx packages/txline/src/cli.ts verify",
     "anchor:build": "anchor build",
     "anchor:test": "cargo test --workspace",
+    "program:verify": "node --import tsx tooling/verify-pool-lifecycle-devnet.ts",
     "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run security:client-bundle && npm run test:rendered && npm run anchor:test"
   },
   "devDependencies": {
+    "@solana/spl-token": "0.4.15",
     "@types/node": "22.19.19",
     "prettier": "3.9.5",
     "tsx": "4.23.1",

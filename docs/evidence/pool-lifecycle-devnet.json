@@ -1,0 +1,55 @@
+{
+  "verifiedAt": "2026-07-17T22:41:59.851Z",
+  "network": "devnet",
+  "rpcGenesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "verificationMethod": "Funded SPL-token lifecycle against the deployed ProofPlay Anchor program",
+  "deployment": {
+    "programId": "AJwjCjk9sb9SWMiuLWDCDgnL6zFEENgnULfkCYaU5Ar",
+    "programdataAddress": "CanhhSQUinkLNNQpiHTEBbBfhX58e3qxsnsvL2YbzaW9",
+    "authority": "FxS7FgTfcn8wFBC96p2ngu7n7JG2ab4iCxn5dzBamhKp",
+    "signature": "3G3R2ZPRfeqnQDyeFyVVruXxjjwD9VVGWc6Jt5vEZX1X7jwBATap6pxfkepkg2a2kgw4n7sFp6cV4EVZ2eyiGysn",
+    "slot": 477007778,
+    "dataLength": 370464
+  },
+  "demoTokenMint": "C6eDfhad3BqR99NxMyvhQf9EGqG9DSe71xVomb4u9H1w",
+  "compilerVersion": 1,
+  "conditionCommitmentHex": "d2e7ea3af5761bfa010397b9f3ad89acdb579190666ac5a158106d3ccc771bf3",
+  "participantFundingSignature": "3J8kxAWBUXjG2Go3KbY7BmfimrD9mh9eLu7S8h9fN8wRTHJNx1DScLL7TsgFpxXnPC5jTr55QRECmUqgLQwtb2V9",
+  "settledPool": {
+    "address": "53UDN2h1aaFuBTErPYszLSZXVkkZsjQ7uiBXa9LeSXqr",
+    "vault": "8mwx5Dmr96jrnCTYSBSpuB6GPxXKbC9rAJowt8Utu4sV",
+    "createSignature": "uX27t1v72ABxFE3FroHvGWzwZegUd8Hb1DDHCTvUhN8sKbDMBmgh9hsB4S5CgvGCMC4YHgd9tsvUpxW9EgnyKKx",
+    "joinYesSignature": "3eNT5jY3Y9V2mCrevnHJiDcz5anR9C9WQy9NHJiLR7iFJQuaxKbQbBpKabwcjDP6UE7diaqZRpSohKzPG3AVYzSe",
+    "joinNoSignature": "tTkg9NrmXDbzP4h9Uc8KA1vPGB9habYSmVdqb4QqTZjV9upNxHSt21oFu8CqoB5MkBJz2Wd4M3RD14vKaUTZZWr",
+    "lockSignature": "vf82Yp2jnR2hfWm2D4TjBPdsh9x86DYJ5RmYr6GagxbDhvjqkmgVNre7hiBQKQY3w4CAUkS7Y3vDXyCsJud7xiB",
+    "settleSignature": "4Eht8uKxhZreqG48XYaUDMp6WEfZmKMsVexJvfB8SFecrbQmVkDytigsaaPErMf5PVEv8nesCBhShfd4skmwDsC4",
+    "claimSignature": "q6Aj2jg6vw6nASCwHPFG4WqJ2nxE8Mjdh2x48WjGCwxF8BzZhQjrVp7tpgzN2AuNUwr3bRVsv12cY6SQyFg5cbY",
+    "yesAmount": "4000000",
+    "noAmount": "6000000",
+    "remainingPoolAmount": "0",
+    "remainingWinningStake": "0",
+    "finalState": "closed",
+    "vaultBalance": "0",
+    "rejected": {
+      "lateDeposit": "CutoffPassed",
+      "losingClaim": "NotWinningPosition",
+      "substitutedVault": "ConstraintSeeds",
+      "duplicateClaim": "InvalidPayoutState"
+    }
+  },
+  "refundedPool": {
+    "address": "CRaHHpDKR9pogFVtdZG7hzdtdxivdMCpJ1dRxHqCmVdz",
+    "vault": "DnP2mJqZSWoytQVS6jRbkvPauL2PNgbURJGD8toEbfLL",
+    "createSignature": "2NBpDz8SCENVYLgXJAF36mmoTUMyhxumzqnsPFv5rcmovPjEYxGixf61WHqrvvEBkv8B4yF5yjm6mBBZxbqB4p6x",
+    "joinSignature": "wB8mYwKW2F6bsvZtVjWNChEM3thkZ74M2TgaA8DUiDP2Dr5qELs3XSxDErW7DBuRCqYebNpT3vV6m5pXgA5Yt2d",
+    "cancelSignature": "4kpoBqqeXuVysrPs1tD9mG2opUqgmcBtPiisvgCN5ELzpvhhwobJrX2UoBDAjXaHNpACFvGKiXwsSdbv9Dz6JcRL",
+    "refundSignature": "LWYyrXDWVVNEhkx4NCegRsBa3yLgqqQrz1ibskSZYmxQchJjssMYSVdcTCfbmg7k7k1ofWDmXaYzvfAMMoEEYYB",
+    "remainingPoolAmount": "0",
+    "finalState": "closed",
+    "vaultBalance": "0",
+    "rejected": {
+      "duplicateRefund": "RefundNotAvailable"
+    }
+  },
+  "credentialsIncluded": false
+}
