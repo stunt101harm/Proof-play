@@ -11,6 +11,7 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [Judge demo script](docs/demo-script.md)
 - [TxLINE devnet runbook](docs/txline-devnet.md)
 - [Typed TxLINE adapter contract](docs/txline-adapter.md)
+- [Condition compiler v1](docs/condition-compiler.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status

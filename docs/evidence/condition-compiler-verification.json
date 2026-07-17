@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-07-17T21:46:41.241Z",
+  "network": "devnet",
+  "verificationMethod": "TxLINE authenticated historical proof plus unsigned Solana simulateTransaction",
+  "rpcGenesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "txlineProgramId": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J",
+  "dailyScoresMerkleRoots": "HJ6nSVkUs4VG9JQ5sEUq3VbmyUSBf76ePXUCATLtRYTX",
+  "fixtureId": "18241006",
+  "sequence": 962,
+  "proofTimestamp": "2026-07-15T21:14:24.772Z",
+  "proofPeriod": [100],
+  "statKeys": [1, 2, 7, 8],
+  "statValues": [1, 2, 1, 6],
+  "humanStatement": "Participant 2 wins and total corners are at most 7.",
+  "canonicalJson": "{\"fixtureId\":\"18241006\",\"legs\":[{\"kind\":\"participantWins\",\"participant\":2},{\"comparison\":\"atMost\",\"kind\":\"totalCorners\",\"threshold\":7}],\"operator\":\"all\",\"version\":1}",
+  "conditionCommitmentHex": "d2e7ea3af5761bfa010397b9f3ad89acdb579190666ac5a158106d3ccc771bf3",
+  "strategy": {
+    "geometricTargets": [],
+    "distancePredicate": null,
+    "discretePredicates": [
+      {
+        "binary": {
+          "indexA": 1,
+          "indexB": 0,
+          "op": { "subtract": {} },
+          "predicate": {
+            "threshold": 0,
+            "comparison": { "greaterThan": {} }
+          }
+        }
+      },
+      {
+        "binary": {
+          "indexA": 2,
+          "indexB": 3,
+          "op": { "add": {} },
+          "predicate": {
+            "threshold": 8,
+            "comparison": { "lessThan": {} }
+          }
+        }
+      }
+    ]
+  },
+  "localEvaluation": true,
+  "onchainValidation": true
+}
