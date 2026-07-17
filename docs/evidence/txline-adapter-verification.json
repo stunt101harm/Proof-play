@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-07-17T21:18:50Z",
+  "network": "devnet",
+  "adapterSchemaVersion": 1,
+  "fixtureSnapshot": {
+    "competitionId": 72,
+    "recordCount": 106,
+    "detailFixtureId": "17588223"
+  },
+  "oddsSnapshot": {
+    "fixtureId": "17588223",
+    "marketCount": 29,
+    "sampleMarketType": "1X2_PARTICIPANT_RESULT",
+    "sampleOutcomeCount": 3
+  },
+  "scoresSnapshot": {
+    "fixtureId": "18241006",
+    "recordCount": 37,
+    "firstSequence": 0,
+    "lastSequence": 963
+  },
+  "historicalScores": {
+    "fixtureId": "18241006",
+    "recordCount": 964,
+    "sequenceOrdered": true,
+    "finalRecord": {
+      "sequence": 962,
+      "action": "game_finalised",
+      "statusId": 100,
+      "lifecycle": "finalized",
+      "stats": {
+        "participant1Goals": 1,
+        "participant2Goals": 2,
+        "participant1Corners": 1,
+        "participant2Corners": 6
+      }
+    }
+  },
+  "proof": {
+    "fixtureId": "18241006",
+    "sequence": 962,
+    "requestedStatKeys": [1, 2, 7, 8],
+    "returnedStatValues": [1, 2, 1, 6],
+    "statProofCount": 4
+  },
+  "credentialsIncluded": false
+}

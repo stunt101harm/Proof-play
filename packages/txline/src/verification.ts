@@ -1,4 +1,4 @@
-import { TxlineApiClient } from "./client";
+import { startGuestSession, TxlineApiClient } from "./client";
 import { TxlineDiagnosticError } from "./errors";
 import type { TxlineNetworkConfig } from "./network";
 import type { StoredTxlineCredentials } from "./server";
@@ -94,21 +94,8 @@ export async function verifyTxlineDataPaths(options: {
 }) {
   const { config, credentials } = options;
   const renewGuestJwt = async () => {
-    const response = await fetch(
-      new URL("/auth/guest/start", config.apiOrigin),
-      {
-        method: "POST",
-        headers: { Accept: "application/json" },
-      },
-    );
-    if (!response.ok)
-      throw new Error(`JWT renewal failed with ${response.status}`);
-    const data = (await response.json()) as { token?: unknown };
-    if (typeof data.token !== "string") {
-      throw new Error("JWT renewal response did not contain a token");
-    }
-    credentials.guestJwt = data.token;
-    return data.token;
+    credentials.guestJwt = await startGuestSession(config);
+    return credentials.guestJwt;
   };
   const client = new TxlineApiClient(
     config,
