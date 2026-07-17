@@ -1,12 +1,12 @@
 # ProofPlay MVP product specification
 
-| Field | Value |
-| --- | --- |
-| Status | Accepted for hackathon MVP |
-| Version | 1.0 |
-| Target network | Solana devnet |
-| Submission deadline | July 19, 2026 at 23:59 UTC |
-| Parent epic | [#1](https://github.com/stunt101harm/Proof-play/issues/1) |
+| Field               | Value                                                     |
+| ------------------- | --------------------------------------------------------- |
+| Status              | Accepted for hackathon MVP                                |
+| Version             | 1.0                                                       |
+| Target network      | Solana devnet                                             |
+| Submission deadline | July 19, 2026 at 23:59 UTC                                |
+| Parent epic         | [#1](https://github.com/stunt101harm/Proof-play/issues/1) |
 
 ## Product statement
 
@@ -64,19 +64,19 @@ Wants to understand the problem, complete the golden path without setup, inspect
 
 ## MVP scope
 
-| Capability | P0 behavior |
-| --- | --- |
-| Match discovery | Covered World Cup fixtures grouped by date and match state |
-| Match center | Phase, score, relevant stats, timeline, odds when returned, and source status |
-| Market creation | Structured builder with one or two condition blocks joined by `AND` |
-| Pool model | Binary YES/NO pari-mutuel pool |
-| Participation | Devnet wallet deposits using a dedicated demo SPL token |
-| Live data | TxLINE score SSE through a server-side adapter |
-| Replay | Accelerated historical replay using the same normalized event model |
-| Settlement | Final match record plus TxLINE validation on Solana |
-| Claims | Pro-rata winner claims; refund path for cancelled pools |
-| Receipt | Human condition, stats, predicate, proof status, transaction, and payout |
-| Judge Demo | Wallet-free seeded golden path with links to real devnet evidence |
+| Capability      | P0 behavior                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| Match discovery | Covered World Cup fixtures grouped by date and match state                    |
+| Match center    | Phase, score, relevant stats, timeline, odds when returned, and source status |
+| Market creation | Structured builder with one or two condition blocks joined by `AND`           |
+| Pool model      | Binary YES/NO pari-mutuel pool                                                |
+| Participation   | Devnet wallet deposits using a dedicated demo SPL token                       |
+| Live data       | TxLINE score SSE through a server-side adapter                                |
+| Replay          | Accelerated historical replay using the same normalized event model           |
+| Settlement      | Final match record plus TxLINE validation on Solana                           |
+| Claims          | Pro-rata winner claims; refund path for cancelled pools                       |
+| Receipt         | Human condition, stats, predicate, proof status, transaction, and payout      |
+| Judge Demo      | Wallet-free seeded golden path with links to real devnet evidence             |
 
 ## Supported condition catalog
 
@@ -84,23 +84,23 @@ TxLINE identifies the two fixture teams as Participant 1 and Participant 2. Proo
 
 P0 conditions use full-game keys from the [TxLINE soccer feed specification](https://txline.txodds.com/documentation/scores/soccer-feed):
 
-| Key | Meaning |
-| --- | --- |
-| `1` | Participant 1 total goals |
-| `2` | Participant 2 total goals |
+| Key | Meaning                     |
+| --- | --------------------------- |
+| `1` | Participant 1 total goals   |
+| `2` | Participant 2 total goals   |
 | `7` | Participant 1 total corners |
 | `8` | Participant 2 total corners |
 
-| User condition | Canonical meaning | Predicate shape |
-| --- | --- | --- |
-| Participant 1 wins | P1 goals exceed P2 goals | `goals[1] - goals[2] > 0` |
-| Participant 2 wins | P2 goals exceed P1 goals | `goals[2] - goals[1] > 0` |
-| Total goals at least `N` | Combined goals are `N` or greater | `goals[1] + goals[2] > N - 1` |
-| Total goals at most `N` | Combined goals are `N` or fewer | `goals[1] + goals[2] < N + 1` |
-| Both teams score | Each participant scores at least once | `goals[1] > 0 AND goals[2] > 0` |
+| User condition                   | Canonical meaning                          | Predicate shape                      |
+| -------------------------------- | ------------------------------------------ | ------------------------------------ |
+| Participant 1 wins               | P1 goals exceed P2 goals                   | `goals[1] - goals[2] > 0`            |
+| Participant 2 wins               | P2 goals exceed P1 goals                   | `goals[2] - goals[1] > 0`            |
+| Total goals at least `N`         | Combined goals are `N` or greater          | `goals[1] + goals[2] > N - 1`        |
+| Total goals at most `N`          | Combined goals are `N` or fewer            | `goals[1] + goals[2] < N + 1`        |
+| Both teams score                 | Each participant scores at least once      | `goals[1] > 0 AND goals[2] > 0`      |
 | Participant wins by at least `N` | Selected goal difference is `N` or greater | `selectedGoals - otherGoals > N - 1` |
-| Total corners at least `N` | Combined corners are `N` or greater | `corners[1] + corners[2] > N - 1` |
-| Total corners at most `N` | Combined corners are `N` or fewer | `corners[1] + corners[2] < N + 1` |
+| Total corners at least `N`       | Combined corners are `N` or greater        | `corners[1] + corners[2] > N - 1`    |
+| Total corners at most `N`        | Combined corners are `N` or fewer          | `corners[1] + corners[2] < N + 1`    |
 
 The UI may describe integer bounds using familiar half-lines, such as “over 2.5 goals,” but the canonical condition stores only the equivalent integer constraint, such as “at least 3 goals.” This avoids floating-point settlement semantics.
 
@@ -237,13 +237,13 @@ The asset is a dedicated, clearly labelled devnet demo token. TxLINE subscriptio
 
 These questions do not change the frozen product contract and have explicit owners:
 
-| Question | Owning issue | Required decision |
-| --- | --- | --- |
-| Which covered historical fixture provides the strongest verified replay? | [#20](https://github.com/stunt101harm/Proof-play/issues/20) | Before Judge Demo seeding |
-| Does the deployed TxLINE devnet interface support direct program CPI for the selected V2 strategy? | [#15](https://github.com/stunt101harm/Proof-play/issues/15) | Before settlement implementation is finalized |
-| Which demo-token program/mint and funding flow will be used? | [#22](https://github.com/stunt101harm/Proof-play/issues/22) and [#24](https://github.com/stunt101harm/Proof-play/issues/24) | Before devnet participation testing |
-| Where will the SSE proxy and keeper run persistently? | [#2](https://github.com/stunt101harm/Proof-play/issues/2) | Before production deployment |
-| What historical data may be cached for replay under the hackathon license? | [#20](https://github.com/stunt101harm/Proof-play/issues/20) and [#14](https://github.com/stunt101harm/Proof-play/issues/14) | Before committing or deploying replay material |
+| Question                                                                                           | Owning issue                                                                                                                | Required decision                              |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Which covered historical fixture provides the strongest verified replay?                           | [#20](https://github.com/stunt101harm/Proof-play/issues/20)                                                                 | Before Judge Demo seeding                      |
+| Does the deployed TxLINE devnet interface support direct program CPI for the selected V2 strategy? | [#15](https://github.com/stunt101harm/Proof-play/issues/15)                                                                 | Before settlement implementation is finalized  |
+| Which demo-token program/mint and funding flow will be used?                                       | [#22](https://github.com/stunt101harm/Proof-play/issues/22) and [#24](https://github.com/stunt101harm/Proof-play/issues/24) | Before devnet participation testing            |
+| Where will the SSE proxy and keeper run persistently?                                              | [#2](https://github.com/stunt101harm/Proof-play/issues/2)                                                                   | Before production deployment                   |
+| What historical data may be cached for replay under the hackathon license?                         | [#20](https://github.com/stunt101harm/Proof-play/issues/20) and [#14](https://github.com/stunt101harm/Proof-play/issues/14) | Before committing or deploying replay material |
 
 ## Release boundary
 

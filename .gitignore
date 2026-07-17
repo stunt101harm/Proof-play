@@ -1,0 +1,30 @@
+# Dependencies and JavaScript build output
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local hosting state
+.wrangler/
+.dev.vars
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*-keypair.json
+_keys/
+.keys/
+
+# Anchor, Solana, and Rust build output
+target/
+test-ledger/
+.anchor/
+
+# Logs and editor files
+*.log
+.DS_Store
+.idea/
+.vscode/

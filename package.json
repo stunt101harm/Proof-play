@@ -1,0 +1,42 @@
+{
+  "name": "proof-play",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Verifiable same-match prediction pools powered by TxLINE and Solana.",
+  "engines": {
+    "node": ">=22.13.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "scripts/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@proof-play/web",
+    "build": "npm run build --workspace=@proof-play/web",
+    "start": "npm run start --workspace=@proof-play/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run workspace:check && npm run test:unit",
+    "test:unit": "vitest run",
+    "test:rendered": "npm run test:rendered --workspace=@proof-play/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "workspace:check": "node tooling/check-workspace-graph.mjs",
+    "anchor:build": "anchor build",
+    "anchor:test": "cargo test --workspace",
+    "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run test:rendered && npm run anchor:test"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "prettier": "3.9.5",
+    "tsx": "4.23.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "overrides": {
+    "postcss": "8.5.19",
+    "vite": "8.1.5"
+  }
+}
