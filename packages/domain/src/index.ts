@@ -8,7 +8,7 @@ export const SYSTEM_COMPONENTS = [
   {
     name: "TxLINE data",
     description: "Fixtures, odds, score events, and validation proofs.",
-    status: "Integration queued",
+    status: "Typed adapter ready",
   },
   {
     name: "Condition engine",
@@ -30,3 +30,5 @@ export const SYSTEM_COMPONENTS = [
 
 export type DataSourceMode = "live" | "historicalReplay" | "simulated";
 export type SolanaNetwork = "devnet";
+
+export * from "./sports";

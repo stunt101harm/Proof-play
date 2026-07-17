@@ -1,5 +1,6 @@
 import { TxlineDiagnosticError, txlineHttpError } from "./errors";
 import type { TxlineNetworkConfig } from "./network";
+import { emitTxlineTelemetry, type TxlineTelemetrySink } from "./telemetry";
 
 export type TxlineCredentials = {
   apiToken: string;
@@ -9,7 +10,40 @@ export type TxlineCredentials = {
 export type TxlineClientOptions = {
   fetch?: typeof fetch;
   renewGuestJwt?: () => Promise<string>;
+  telemetry?: TxlineTelemetrySink;
 };
+
+export async function startGuestSession(
+  config: TxlineNetworkConfig,
+  fetchImplementation: typeof fetch = fetch,
+) {
+  const endpoint = "/auth/guest/start";
+  const response = await fetchImplementation(
+    new URL(endpoint, config.apiOrigin),
+    {
+      method: "POST",
+      headers: { Accept: "application/json" },
+    },
+  );
+  if (!response.ok) {
+    throw txlineHttpError(endpoint, response.status, await response.text());
+  }
+  const body = (await response.json()) as unknown;
+  const token =
+    typeof body === "object" && body !== null && "token" in body
+      ? (body as { token?: unknown }).token
+      : undefined;
+  if (typeof token !== "string" || token.length === 0) {
+    throw new TxlineDiagnosticError({
+      code: "TXLINE_INVALID_RESPONSE",
+      message: "TxLINE guest authentication did not return a token.",
+      hint: "Confirm the guest-auth host matches the configured TxLINE network.",
+      endpoint,
+      status: response.status,
+    });
+  }
+  return token;
+}
 
 export function parseSseJsonData(value: string) {
   const records: unknown[] = [];
@@ -37,6 +71,7 @@ export class TxlineApiClient {
   readonly credentials: TxlineCredentials;
   readonly #fetch: typeof fetch;
   readonly #renewGuestJwt?: () => Promise<string>;
+  readonly #telemetry?: TxlineTelemetrySink;
 
   constructor(
     config: TxlineNetworkConfig,
@@ -47,36 +82,14 @@ export class TxlineApiClient {
     this.credentials = { ...credentials };
     this.#fetch = options.fetch ?? fetch;
     this.#renewGuestJwt = options.renewGuestJwt;
+    this.#telemetry = options.telemetry;
   }
 
   async getJson<T>(endpoint: string): Promise<T> {
-    return this.#requestJson<T>(endpoint, false);
-  }
-
-  async #requestJson<T>(endpoint: string, renewed: boolean): Promise<T> {
-    const relativeEndpoint = endpoint.startsWith("/")
-      ? endpoint.slice(1)
-      : endpoint;
-    const response = await this.#fetch(
-      new URL(relativeEndpoint, `${this.config.apiBaseUrl}/`),
-      {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${this.credentials.guestJwt}`,
-          "X-Api-Token": this.credentials.apiToken,
-        },
-      },
-    );
-
-    if (response.status === 401 && !renewed && this.#renewGuestJwt) {
-      this.credentials.guestJwt = await this.#renewGuestJwt();
-      return this.#requestJson<T>(endpoint, true);
-    }
-
-    if (!response.ok) {
-      throw txlineHttpError(endpoint, response.status, await response.text());
-    }
-
+    const response = await this.#request(endpoint, {
+      accept: "application/json",
+      renewed: false,
+    });
     const responseBody = await response.text();
     if (response.headers.get("content-type")?.includes("text/event-stream")) {
       return parseSseJsonData(responseBody) as T;
@@ -95,5 +108,98 @@ export class TxlineApiClient {
         cause,
       });
     }
+  }
+
+  async openEventStream(
+    endpoint: string,
+    options: { signal?: AbortSignal; lastEventId?: string } = {},
+  ) {
+    return this.#request(endpoint, {
+      accept: "text/event-stream",
+      renewed: false,
+      signal: options.signal,
+      lastEventId: options.lastEventId,
+    });
+  }
+
+  async #request(
+    endpoint: string,
+    options: {
+      accept: "application/json" | "text/event-stream";
+      renewed: boolean;
+      signal?: AbortSignal;
+      lastEventId?: string;
+    },
+  ): Promise<Response> {
+    const relativeEndpoint = endpoint.startsWith("/")
+      ? endpoint.slice(1)
+      : endpoint;
+    const startedAt = Date.now();
+    let response: Response;
+
+    try {
+      response = await this.#fetch(
+        new URL(relativeEndpoint, `${this.config.apiBaseUrl}/`),
+        {
+          headers: {
+            Accept: options.accept,
+            Authorization: `Bearer ${this.credentials.guestJwt}`,
+            "Cache-Control": "no-cache",
+            "X-Api-Token": this.credentials.apiToken,
+            ...(options.lastEventId
+              ? { "Last-Event-ID": options.lastEventId }
+              : {}),
+          },
+          signal: options.signal,
+        },
+      );
+    } catch (cause) {
+      emitTxlineTelemetry(this.#telemetry, {
+        kind: "request",
+        operation: "http",
+        outcome: "error",
+        endpoint,
+        durationMs: Date.now() - startedAt,
+        code: cause instanceof Error ? cause.name : "FETCH_ERROR",
+      });
+      throw cause;
+    }
+
+    if (response.status === 401 && !options.renewed && this.#renewGuestJwt) {
+      emitTxlineTelemetry(this.#telemetry, {
+        kind: "request",
+        operation: "guest-jwt-renewal",
+        outcome: "retry",
+        endpoint,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+      });
+      await response.body?.cancel();
+      this.credentials.guestJwt = await this.#renewGuestJwt();
+      return this.#request(endpoint, { ...options, renewed: true });
+    }
+
+    if (!response.ok) {
+      emitTxlineTelemetry(this.#telemetry, {
+        kind: "request",
+        operation: "http",
+        outcome: "error",
+        endpoint,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+      });
+      throw txlineHttpError(endpoint, response.status, await response.text());
+    }
+
+    emitTxlineTelemetry(this.#telemetry, {
+      kind: "request",
+      operation:
+        options.accept === "text/event-stream" ? "sse-connect" : "http",
+      outcome: "success",
+      endpoint,
+      status: response.status,
+      durationMs: Date.now() - startedAt,
+    });
+    return response;
   }
 }

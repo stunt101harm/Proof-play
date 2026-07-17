@@ -10,6 +10,7 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [Domain and state model](docs/state-model.md)
 - [Judge demo script](docs/demo-script.md)
 - [TxLINE devnet runbook](docs/txline-devnet.md)
+- [Typed TxLINE adapter contract](docs/txline-adapter.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status

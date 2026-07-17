@@ -21,6 +21,7 @@
     "test": "npm run workspace:check && npm run test:unit",
     "test:unit": "vitest run",
     "test:rendered": "npm run test:rendered --workspace=@proof-play/web",
+    "security:client-bundle": "node tooling/check-client-secrets.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "workspace:check": "node tooling/check-workspace-graph.mjs",
@@ -32,7 +33,7 @@
     "txline:verify": "node --import tsx packages/txline/src/cli.ts verify",
     "anchor:build": "anchor build",
     "anchor:test": "cargo test --workspace",
-    "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run test:rendered && npm run anchor:test"
+    "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run security:client-bundle && npm run test:rendered && npm run anchor:test"
   },
   "devDependencies": {
     "@types/node": "22.19.19",

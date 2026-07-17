@@ -10,6 +10,7 @@ import {
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import nacl from "tweetnacl";
+import { startGuestSession } from "./client";
 import { TXLINE_DEVNET_IDL } from "./devnet-idl";
 import { TxlineDiagnosticError, txlineHttpError } from "./errors";
 import {
@@ -155,10 +156,7 @@ export async function assertDevnetConnection(
 }
 
 export async function requestGuestJwt(config: TxlineNetworkConfig) {
-  const response = await postJson(
-    new URL("/auth/guest/start", config.apiOrigin),
-  );
-  return parseTokenResponse(response, "guest authentication");
+  return startGuestSession(config);
 }
 
 export async function writeStoredCredentials(
