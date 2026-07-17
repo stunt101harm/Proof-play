@@ -8,6 +8,7 @@ coverage/
 # Local hosting state
 .wrangler/
 .dev.vars
+.txline/
 
 # Local environment and credentials
 .env

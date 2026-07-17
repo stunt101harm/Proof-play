@@ -12,9 +12,10 @@ describe("workspace contract", () => {
   });
 
   it("defaults the TxLINE adapter to the documented devnet host", () => {
-    expect(getTxlineNetworkConfig("devnet")).toEqual({
+    expect(getTxlineNetworkConfig("devnet")).toMatchObject({
       apiOrigin: "https://txline-dev.txodds.com",
       programId: "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J",
+      tokenMint: "4Zao8ocPhmMgq7PdsYWyxvqySMGx7xb9cMftPMkEokRG",
     });
   });
 });

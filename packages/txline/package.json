@@ -4,12 +4,17 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@proof-play/domain": "*"
+    "@coral-xyz/anchor": "0.32.1",
+    "@proof-play/domain": "*",
+    "@solana/web3.js": "1.98.4",
+    "eventsource": "4.1.0",
+    "tweetnacl": "1.0.3"
   }
 }

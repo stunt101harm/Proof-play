@@ -24,6 +24,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "workspace:check": "node tooling/check-workspace-graph.mjs",
+    "txline:address": "node --import tsx packages/txline/src/cli.ts address",
+    "txline:diagnose": "node --import tsx packages/txline/src/cli.ts diagnose",
+    "txline:activate": "node --import tsx packages/txline/src/cli.ts activate",
+    "txline:recover": "node --import tsx packages/txline/src/cli.ts recover",
+    "txline:renew": "node --import tsx packages/txline/src/cli.ts renew",
+    "txline:verify": "node --import tsx packages/txline/src/cli.ts verify",
     "anchor:build": "anchor build",
     "anchor:test": "cargo test --workspace",
     "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run test:rendered && npm run anchor:test"
