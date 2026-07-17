@@ -113,7 +113,7 @@ Canonicalization rules:
 ```ts
 type CompiledConditionV1 = {
   compilerVersion: 1;
-  validationMethod: "validateStatV2";
+  validationMethod: "validateStatV3";
   fixtureId: string;
   condition: CanonicalConditionV1;
   humanStatement: string;
@@ -126,7 +126,7 @@ type CompiledConditionV1 = {
 };
 ```
 
-The `humanStatement` is derived output and is never independently accepted as settlement input. Strategy indexes refer to positions in `statKeys`, not to the numeric value of a stat key. TxLINE V2 requires every requested index to be evaluated exactly once, so compiler v1 rejects compound legs whose stat-key coverage overlaps.
+The `humanStatement` is derived output and is never independently accepted as settlement input. Strategy indexes refer to positions in `statKeys`, not to the numeric value of a stat key. TxLINE V3 requires every requested index to be evaluated exactly once, so compiler v1 rejects compound legs whose stat-key coverage overlaps.
 
 ## Pool lifecycle
 

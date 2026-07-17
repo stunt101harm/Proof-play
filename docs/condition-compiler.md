@@ -44,13 +44,13 @@ The compiler:
 6. Serializes the normalized document with RFC 8785 JSON Canonicalization Scheme semantics.
 7. Hashes the UTF-8 canonical JSON with SHA-256.
 
-Display names are optional inputs to rendering and never enter the canonical JSON or commitment. The output includes the normalized condition, readable full statement and per-leg statements, canonical JSON, 32 commitment bytes plus hex, ordered stat keys, exact `validateStatV2` strategy, and predicate-to-leg indexes for receipts and local evaluation.
+Display names are optional inputs to rendering and never enter the canonical JSON or commitment. The output includes the normalized condition, readable full statement and per-leg statements, canonical JSON, 32 commitment bytes plus hex, ordered stat keys, exact `validateStatV3` strategy, and predicate-to-leg indexes for receipts and local evaluation.
 
 ## TxLINE exact-coverage rule
 
-TxLINE `validateStatV2` requires every requested stat index to be evaluated exactly once across the complete strategy. The compiler therefore rejects two legs that reuse a stat key with `DUPLICATE_STAT_COVERAGE`.
+TxLINE `validateStatV3` requires every requested stat index to be evaluated exactly once across the complete strategy. The compiler therefore rejects two legs that reuse a stat key with `DUPLICATE_STAT_COVERAGE`.
 
-For example, winner plus total goals is logically meaningful but both legs reuse goal keys `1` and `2`, so it cannot be represented by this V2 strategy. Winner plus total corners is valid: the first predicate covers indexes `0` and `1`, the second covers indexes `2` and `3`, and the proof requests each leaf exactly once. The creator UI should offer only compatible second legs rather than letting the on-chain program reject the result later.
+For example, winner plus total goals is logically meaningful but both legs reuse goal keys `1` and `2`, so it cannot be represented by this V3 strategy. Winner plus total corners is valid: the first predicate covers indexes `0` and `1`, the second covers indexes `2` and `3`, and the proof requests each leaf exactly once. The creator UI should offer only compatible second legs rather than letting the on-chain program reject the result later.
 
 ## Local evaluation
 

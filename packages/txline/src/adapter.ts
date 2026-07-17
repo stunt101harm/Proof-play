@@ -10,6 +10,7 @@ import {
   normalizeOdds,
   normalizeScore,
   normalizeScoreProof,
+  normalizeScoreProofV3,
   unwrapTxlineRecords,
 } from "./normalizers";
 import { streamNormalizedScores, type ScoreStreamOptions } from "./sse";
@@ -18,6 +19,7 @@ import type {
   FixtureQuery,
   TxlineAdapterContract,
   TxlineScoreProof,
+  TxlineScoreProofV3,
 } from "./types";
 
 export type TxlineAdapterOptions = {
@@ -225,6 +227,68 @@ export class TxlineAdapter implements TxlineAdapterContract {
         operation: "scores.proof",
         outcome: "error",
         endpoint: "/scores/stat-validation",
+        durationMs: Date.now() - startedAt,
+        code:
+          error instanceof TxlineDiagnosticError
+            ? error.code
+            : "NORMALIZATION_ERROR",
+      });
+      throw error;
+    }
+  }
+
+  async getScoreProofV3(input: {
+    fixtureId: string;
+    sequence: number;
+    statKeys: number[];
+  }): Promise<TxlineScoreProofV3> {
+    const fixtureId = assertFixtureId(input.fixtureId);
+    if (!Number.isSafeInteger(input.sequence) || input.sequence <= 0) {
+      throw new TxlineDiagnosticError({
+        code: "TXLINE_INVALID_SEQUENCE",
+        message: "A score proof requires a positive observed sequence.",
+        hint: "Read Seq/seq from a finalized TxLINE record; never use zero or a synthetic value.",
+      });
+    }
+    if (
+      input.statKeys.length === 0 ||
+      input.statKeys.some(
+        (key) => !Number.isSafeInteger(key) || key <= 0 || key > 0xffff_ffff,
+      ) ||
+      new Set(input.statKeys).size !== input.statKeys.length
+    ) {
+      throw invalidInput(
+        "V3 proof stat keys must be a non-empty list of unique positive u32 integers.",
+      );
+    }
+    const params = new URLSearchParams({
+      fixtureId,
+      seq: String(input.sequence),
+      statKeys: input.statKeys.join(","),
+    });
+    const endpoint = `/scores/stat-validation-v3?${params}`;
+    const startedAt = Date.now();
+    try {
+      const proof = normalizeScoreProofV3(await this.client.getJson(endpoint), {
+        fixtureId,
+        sequence: input.sequence,
+        statKeys: input.statKeys,
+      });
+      emitTxlineTelemetry(this.#telemetry, {
+        kind: "normalization",
+        operation: "scores.proof.v3",
+        outcome: "success",
+        endpoint: "/scores/stat-validation-v3",
+        durationMs: Date.now() - startedAt,
+        recordCount: proof.payload.leaves.length,
+      });
+      return proof;
+    } catch (error) {
+      emitTxlineTelemetry(this.#telemetry, {
+        kind: "normalization",
+        operation: "scores.proof.v3",
+        outcome: "error",
+        endpoint: "/scores/stat-validation-v3",
         durationMs: Date.now() - startedAt,
         code:
           error instanceof TxlineDiagnosticError

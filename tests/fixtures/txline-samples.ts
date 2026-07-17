@@ -67,3 +67,33 @@ export const RAW_SCORE_PROOF = {
   subTreeProof: [{ hash: hash(4), isRightSibling: false }],
   mainTreeProof: [{ hash: hash(5), isRightSibling: false }],
 };
+
+export const RAW_SCORE_PROOF_V3 = {
+  ts: 1_784_150_592_580,
+  summary: {
+    fixtureId: 42,
+    updateStats: {
+      updateCount: 1,
+      minTimestamp: 1_784_150_592_580,
+      maxTimestamp: 1_784_150_592_580,
+    },
+    eventsSubTreeRoot: hash(2),
+  },
+  subTreeProof: [{ hash: hash(4), isRightSibling: false }],
+  mainTreeProof: [{ hash: hash(5), isRightSibling: false }],
+  eventStatRoot: hash(1),
+  statsToProve: [
+    {
+      stat: { key: 1, value: 1, period: 100 },
+      statProof: [],
+    },
+    {
+      stat: { key: 2, value: 2, period: 100 },
+      statProof: [],
+    },
+  ],
+  multiproof: {
+    hashes: [{ hash: hash(9), isRightSibling: true }],
+    indices: [32, 33],
+  },
+};

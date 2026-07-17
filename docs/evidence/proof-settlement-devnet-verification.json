@@ -1,0 +1,95 @@
+{
+  "verifiedAt": "2026-07-17T23:48:27.757Z",
+  "network": "devnet",
+  "rpcGenesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "programId": "AJwjCjk9sb9SWMiuLWDCDgnL6zFEENgnULfkCYaU5Ar",
+  "txlineProgramId": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J",
+  "deployer": "FxS7FgTfcn8wFBC96p2ngu7n7JG2ab4iCxn5dzBamhKp",
+  "participant": "26kq9WbcqcM3h8RVgXEDAsDbc5jy2aBdJE7QRnWE8wSP",
+  "fixture": {
+    "fixtureId": "18241006",
+    "action": "game_finalised",
+    "statusId": 100,
+    "period": null,
+    "sequence": 962
+  },
+  "condition": {
+    "compilerVersion": 1,
+    "validationMethod": "validateStatV3",
+    "conditionCommitmentHex": "d2e7ea3af5761bfa010397b9f3ad89acdb579190666ac5a158106d3ccc771bf3",
+    "statKeys": [1, 2, 7, 8],
+    "statement": "Participant 2 wins and total corners are at most 7."
+  },
+  "proof": {
+    "timestampMs": 1784150064772,
+    "dailyScoresRoot": "HJ6nSVkUs4VG9JQ5sEUq3VbmyUSBf76ePXUCATLtRYTX",
+    "eventStatRoot": "483cad4de6efbba7319341d1e01dded0eda3e163a6fb462f07bbdf3cf77cb6d9",
+    "stats": [
+      {
+        "key": 1,
+        "value": 1,
+        "period": 100
+      },
+      {
+        "key": 2,
+        "value": 2,
+        "period": 100
+      },
+      {
+        "key": 7,
+        "value": 1,
+        "period": 100
+      },
+      {
+        "key": 8,
+        "value": 6,
+        "period": 100
+      }
+    ],
+    "fixtureProofNodes": 1,
+    "mainTreeProofNodes": 1,
+    "multiproofHashNodes": 4,
+    "leafIndices": [32, 33, 36, 37]
+  },
+  "pool": {
+    "address": "3fCNRpakrJdsoaG46xFuHqMUK2YZM9FyvwuJediB5PhD",
+    "vault": "6BUuZE4CfBANR2MPV4ZrGuf5pRs7tjra4JPtbPZfGrVb",
+    "settlementConfig": "FqBjs4mjKXxmHVG1eZKTP4Fvbe8WHCkEaR3oWsAAXwa8",
+    "settlementRecord": "EEtwwWUoBzYdqmu9frqkRWeEuu23mxVygQYzA4XJv8p6",
+    "tokenMint": "9a2D49k4pXkcu9k82uRHwDKnZ8xnt5vM81RRdiZT6PHi",
+    "createSignature": "4U4YHjAzf2Cx4piMshniq67Av3KhP14DhLhb7zNWfixP8vzbNqaJE8YYfjhew911a5AvfKmxo7eYHbdbQXPfBh4J",
+    "yesJoinSignature": "3s85hq3rbarbpEJuy6nhMJQLZXjAKFW4EboofTijH7do6wH5EHSLVLRLD7vuPNd55JK1h7DtKUrMPuPR14gsCVEt",
+    "noJoinSignature": "4GtCTfF49a3GDMGc8qn1xfK5n5xZChjEkaVcJHXLoGgh8b38psgZM7VfFfKY5nFEhjHfCKQFjkC25xSgjfz98LHA",
+    "lockSignature": "562MVLXQYbT4Veje9WxNbBv5bJyfVpNyc2d3gwpZf4pJosp8xugM9DCQ7Y4V9Rm1G3cU5iptNgNrESoxMcZoozrX",
+    "settleSignature": "5DBFhtF8dmg8iPH63RW74px3BrYbfAG1FZJzEiYpEChsUPrateGudXESKiJuyMxjhunVwPyyAeGYFytXucsqrqWH",
+    "claimSignature": "45tAsxmQu3SqNx3bCo1xq9Y1wxhYAZeL4TgWFPsreGvj9GPsiu5npZQMZw81ySsca5GZ4aQH7z1TTghvKGSsxtSX",
+    "participantFundingSignature": "5jvUYXXrDzBURjbeZjVepvQLEmsnqPAUgw5RoD8eqbdQmxgajinsqt7ii6nBtaAFkzyHQ6ryrLfigRX4E9dpatbC",
+    "finalState": "closed",
+    "vaultBalance": "0"
+  },
+  "settlement": {
+    "permissionlessSettler": "FxS7FgTfcn8wFBC96p2ngu7n7JG2ab4iCxn5dzBamhKp",
+    "predicateResult": true,
+    "winningSide": "yes",
+    "observedSequence": "962",
+    "transactionBytes": 883,
+    "maxTransactionBytes": 1232,
+    "computeUnitLimit": 1400000,
+    "computeUnitsConsumed": 210361,
+    "replayRejectedAs": "AccountAlreadyInitialized"
+  },
+  "rejected": {
+    "demoHook": "UnverifiedSettlementDisabled",
+    "fixture": "SettlementFixtureMismatch",
+    "period": "NonFinalSettlementProof",
+    "timestamp": "InvalidProofTimestamp",
+    "strategy": "SettlementStrategyMismatch",
+    "root": "InvalidDailyScoresRoot",
+    "statValue": "InvalidStatProof",
+    "merkleProof": "InvalidFixtureSubTreeProof"
+  },
+  "trustBoundary": {
+    "sequence": "Observed API metadata; TxLINE V3 commits the selected event root but does not include sequence in its on-chain payload.",
+    "finality": "The verifier binds game_finalised/statusId 100 off-chain; the program independently requires every proven stat leaf to use period 100."
+  }
+}

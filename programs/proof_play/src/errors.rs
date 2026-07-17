@@ -50,4 +50,38 @@ pub enum ProofPlayError {
     TokenMintMismatch,
     #[msg("Token account owner does not match the position owner")]
     TokenOwnerMismatch,
+    #[msg("Settlement configuration is invalid")]
+    InvalidSettlementConfig,
+    #[msg("Settlement strategy uses an unsupported predicate shape")]
+    UnsupportedSettlementStrategy,
+    #[msg("Settlement predicate references a stat index outside the configured inputs")]
+    SettlementIndexOutOfBounds,
+    #[msg("Settlement strategy must evaluate every configured stat exactly once")]
+    InvalidSettlementCoverage,
+    #[msg("Settlement configuration does not match the pool")]
+    SettlementConfigMismatch,
+    #[msg("Settlement strategy does not match the pool's immutable configuration")]
+    SettlementStrategyMismatch,
+    #[msg("TxLINE proof fixture does not match the pool")]
+    SettlementFixtureMismatch,
+    #[msg("TxLINE proof timestamp or update summary is invalid")]
+    InvalidProofTimestamp,
+    #[msg("TxLINE proof contains an invalid Merkle root")]
+    InvalidProofRoot,
+    #[msg("TxLINE proof stats do not match the pool's immutable configuration")]
+    SettlementStatMismatch,
+    #[msg("TxLINE settlement proofs must use final full-game period 100")]
+    NonFinalSettlementProof,
+    #[msg("TxLINE program account is not the supported devnet deployment")]
+    InvalidTxlineProgram,
+    #[msg("Daily scores root does not match the proof timestamp")]
+    InvalidDailyScoresRoot,
+    #[msg("Daily scores root is not owned by TxLINE")]
+    InvalidDailyScoresRootOwner,
+    #[msg("TxLINE validation payload could not be serialized")]
+    TxlinePayloadSerializationFailed,
+    #[msg("TxLINE validation did not return a result")]
+    MissingTxlineReturnData,
+    #[msg("TxLINE validation returned malformed data")]
+    InvalidTxlineReturnData,
 }

@@ -72,7 +72,7 @@ export type CompiledConditionLegV1 = {
 
 export type CompiledConditionV1 = {
   compilerVersion: typeof CONDITION_COMPILER_VERSION;
-  validationMethod: "validateStatV2";
+  validationMethod: "validateStatV3";
   fixtureId: string;
   condition: CanonicalConditionV1;
   humanStatement: string;
@@ -325,7 +325,7 @@ export async function compileCondition(
   if (statKeys.length !== requestedStatKeys.length) {
     throw new ConditionCompilerError(
       "DUPLICATE_STAT_COVERAGE",
-      "TxLINE validateStatV2 requires every stat index to be evaluated exactly once; choose condition legs that use disjoint stat keys.",
+      "TxLINE validateStatV3 requires every stat index to be evaluated exactly once; choose condition legs that use disjoint stat keys.",
     );
   }
   const indexByStatKey = new Map(
@@ -358,7 +358,7 @@ export async function compileCondition(
 
   return {
     compilerVersion: CONDITION_COMPILER_VERSION,
-    validationMethod: "validateStatV2",
+    validationMethod: "validateStatV3",
     fixtureId: condition.fixtureId,
     condition,
     humanStatement: renderCondition(condition, displayOptions),

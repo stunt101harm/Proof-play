@@ -8,7 +8,13 @@ import {
   type ScoreAmendment,
 } from "@proof-play/domain";
 import { TxlineDiagnosticError } from "./errors";
-import type { TxlineHash, TxlineProofNode, TxlineScoreProof } from "./types";
+import type {
+  TxlineHash,
+  TxlineProofNode,
+  TxlineProofNodeBytes,
+  TxlineScoreProof,
+  TxlineScoreProofV3,
+} from "./types";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -459,6 +465,39 @@ function normalizeProofNodes(value: unknown, label: string) {
   });
 }
 
+function normalizeHashBytes(value: unknown, label: string) {
+  const hash = normalizeHash(value, label);
+  if (!Array.isArray(hash)) {
+    throw normalizationError(
+      `${label} must use TxLINE's 32-byte array encoding for on-chain validation.`,
+    );
+  }
+  return hash;
+}
+
+function normalizeProofNodeBytes(value: unknown, label: string) {
+  if (!Array.isArray(value))
+    throw normalizationError(`${label} must be an array.`);
+  return value.map((item, index) => {
+    const node = requiredRecord(item, `${label}[${index}]`);
+    const isRightSibling = booleanValue(
+      field(node, ["isRightSibling", "IsRightSibling"]),
+    );
+    if (isRightSibling === undefined) {
+      throw normalizationError(
+        `${label}[${index}] must declare its sibling side.`,
+      );
+    }
+    return {
+      hash: normalizeHashBytes(
+        field(node, ["hash", "Hash"]),
+        `${label}[${index}].hash`,
+      ),
+      isRightSibling,
+    } satisfies TxlineProofNodeBytes;
+  });
+}
+
 export function normalizeScoreProof(
   value: unknown,
   request: { fixtureId: string; sequence: number; statKeys: number[] },
@@ -565,5 +604,142 @@ export function normalizeScoreProof(
       field(record, ["mainTreeProof", "MainTreeProof"]),
       "Score main-tree proof",
     ),
+  };
+}
+
+export function normalizeScoreProofV3(
+  value: unknown,
+  request: { fixtureId: string; sequence: number; statKeys: number[] },
+): TxlineScoreProofV3 {
+  const record = requiredRecord(value, "V3 score proof");
+  const summary = requiredRecord(
+    field(record, ["summary", "Summary"]),
+    "V3 score proof summary",
+  );
+  const updateStats = requiredRecord(
+    field(summary, ["updateStats", "UpdateStats"]),
+    "V3 score proof update stats",
+  );
+  const fixtureId = decimalId(
+    field(summary, ["fixtureId", "FixtureId"]),
+    "V3 proof fixture ID",
+  );
+  if (fixtureId !== request.fixtureId) {
+    throw normalizationError(
+      `V3 proof fixture ${fixtureId} does not match requested fixture ${request.fixtureId}.`,
+    );
+  }
+
+  const rawLeaves = field(record, ["statsToProve", "StatsToProve"]);
+  if (!Array.isArray(rawLeaves)) {
+    throw normalizationError("V3 proof statsToProve must be an array.");
+  }
+  const leaves = rawLeaves.map((item, index) => {
+    const leaf = requiredRecord(item, `V3 proof leaf ${index}`);
+    const stat = requiredRecord(
+      field(leaf, ["stat", "Stat"]),
+      `V3 proof leaf ${index} stat`,
+    );
+    return {
+      stat: {
+        key: requiredInteger(stat, ["key", "Key"], "V3 proof stat key"),
+        value: requiredInteger(stat, ["value", "Value"], "V3 proof stat value"),
+        period: requiredInteger(
+          stat,
+          ["period", "Period"],
+          "V3 proof stat period",
+        ),
+      },
+      statProof: normalizeProofNodeBytes(
+        field(leaf, ["statProof", "StatProof"]),
+        `V3 proof leaf ${index} branch`,
+      ),
+    };
+  });
+  if (
+    leaves.length !== request.statKeys.length ||
+    leaves.some((leaf, index) => leaf.stat.key !== request.statKeys[index])
+  ) {
+    throw normalizationError(
+      "V3 score proof leaves do not match the requested stat-key order.",
+    );
+  }
+
+  const multiproof = requiredRecord(
+    field(record, ["multiproof", "Multiproof"]),
+    "V3 score multiproof",
+  );
+  const rawIndices = field(multiproof, ["indices", "Indices"]);
+  if (
+    !Array.isArray(rawIndices) ||
+    rawIndices.length !== leaves.length ||
+    rawIndices.some(
+      (index) =>
+        !Number.isSafeInteger(index) ||
+        Number(index) < 0 ||
+        Number(index) > 0xffff_ffff,
+    )
+  ) {
+    throw normalizationError(
+      "V3 multiproof indices must provide one valid u32 index per stat leaf.",
+    );
+  }
+
+  const timestamp = requiredInteger(record, ["ts", "Ts"], "V3 proof timestamp");
+  return {
+    fixtureId,
+    sequence: request.sequence,
+    requestedStatKeys: [...request.statKeys],
+    sourceUpdatedAt: isoTimestamp(timestamp, "V3 proof timestamp"),
+    payload: {
+      ts: timestamp,
+      fixtureSummary: {
+        fixtureId,
+        updateStats: {
+          updateCount: requiredInteger(
+            updateStats,
+            ["updateCount", "UpdateCount"],
+            "V3 proof update count",
+          ),
+          minTimestamp: requiredInteger(
+            updateStats,
+            ["minTimestamp", "MinTimestamp"],
+            "V3 proof minimum timestamp",
+          ),
+          maxTimestamp: requiredInteger(
+            updateStats,
+            ["maxTimestamp", "MaxTimestamp"],
+            "V3 proof maximum timestamp",
+          ),
+        },
+        eventsSubTreeRoot: normalizeHashBytes(
+          field(summary, [
+            "eventsSubTreeRoot",
+            "EventsSubTreeRoot",
+            "eventStatsSubTreeRoot",
+            "EventStatsSubTreeRoot",
+          ]),
+          "V3 events subtree root",
+        ),
+      },
+      fixtureProof: normalizeProofNodeBytes(
+        field(record, ["subTreeProof", "SubTreeProof"]),
+        "V3 fixture proof",
+      ),
+      mainTreeProof: normalizeProofNodeBytes(
+        field(record, ["mainTreeProof", "MainTreeProof"]),
+        "V3 main-tree proof",
+      ),
+      eventStatRoot: normalizeHashBytes(
+        field(record, ["eventStatRoot", "EventStatRoot"]),
+        "V3 event-stat root",
+      ),
+      leaves,
+      multiproofHashes: normalizeProofNodeBytes(
+        field(multiproof, ["hashes", "Hashes"]),
+        "V3 multiproof hashes",
+      ),
+      leafIndices: rawIndices.map(Number),
+    },
   };
 }
