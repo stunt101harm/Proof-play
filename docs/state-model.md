@@ -103,7 +103,7 @@ Canonicalization rules:
 - Only documented fields are present; no `undefined`, display names, odds, or timestamps are included.
 - `fixtureId` is a base-10 string with no leading zeros.
 - Thresholds and participant positions are integers.
-- Legs are normalized, deduplicated, and sorted by a versioned stable comparator before hashing.
+- Duplicate legs are rejected; valid legs are normalized and sorted by a versioned stable comparator before hashing.
 - JSON uses RFC 8785 JSON Canonicalization Scheme semantics.
 - The commitment is SHA-256 over the UTF-8 canonical JSON bytes.
 - Compiler version 1 permits one or two `all` legs and at most four unique stat keys.
@@ -113,16 +113,20 @@ Canonicalization rules:
 ```ts
 type CompiledConditionV1 = {
   compilerVersion: 1;
+  validationMethod: "validateStatV2";
   fixtureId: string;
+  condition: CanonicalConditionV1;
   humanStatement: string;
   canonicalJson: string;
   conditionCommitment: Uint8Array; // 32 bytes
+  conditionCommitmentHex: string;
   statKeys: number[]; // stable order
   strategy: TxlineValidationStrategy;
+  compiledLegs: CompiledConditionLegV1[];
 };
 ```
 
-The `humanStatement` is derived output and is never independently accepted as settlement input. Strategy indexes refer to positions in `statKeys`, not to the numeric value of a stat key.
+The `humanStatement` is derived output and is never independently accepted as settlement input. Strategy indexes refer to positions in `statKeys`, not to the numeric value of a stat key. TxLINE V2 requires every requested index to be evaluated exactly once, so compiler v1 rejects compound legs whose stat-key coverage overlaps.
 
 ## Pool lifecycle
 
