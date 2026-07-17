@@ -13,4 +13,56 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 
 ## Status
 
-ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The current repository documents the frozen MVP contract; implementation follows the child issues in the delivery epic.
+ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository now includes the implementation workspace, deployable web foundation, shared package boundaries, and Anchor program scaffold. Product features follow the child issues in the delivery epic.
+
+## Prerequisites
+
+- Node.js 22.13 or newer and npm 10 or newer
+- Rust and Cargo
+- Anchor CLI 0.31.1
+- Solana CLI configured for devnet when running program workflows
+
+## Quick start
+
+```bash
+npm ci
+cp .env.example .env
+npm run dev
+```
+
+The web workspace prints its local URL when ready. TxLINE credentials are not required for the foundation page; server integrations validate them only when the TxLINE client is created.
+
+Never commit `.env`, wallet keypairs, activated API tokens, or guest JWTs.
+
+## Repository structure
+
+```text
+apps/web                  Next.js-compatible web app and server routes
+packages/domain           Shared product and state vocabulary
+packages/txline           TxLINE network and adapter boundary
+packages/condition-engine Versioned condition compiler boundary
+programs/proof_play       Anchor program
+scripts/keeper            Settlement keeper process
+tests                     Cross-workspace tests
+tooling                   Repository validation scripts
+```
+
+## Common commands
+
+| Command                 | Purpose                                       |
+| ----------------------- | --------------------------------------------- |
+| `npm run dev`           | Start the web app                             |
+| `npm run build`         | Build the deployable web worker               |
+| `npm run lint`          | Lint the web workspace                        |
+| `npm run typecheck`     | Typecheck every TypeScript workspace          |
+| `npm test`              | Check workspace boundaries and run unit tests |
+| `npm run test:rendered` | Verify the built app server-renders           |
+| `npm run anchor:build`  | Build the Anchor program                      |
+| `npm run anchor:test`   | Compile and test the Rust workspace           |
+| `npm run check`         | Run the complete local validation suite       |
+
+## Environment
+
+The checked-in [`.env.example`](.env.example) lists every current configuration key. Public values are limited to the Solana network, RPC URL, and ProofPlay program ID. TxLINE credentials and keeper wallet paths are server-only.
+
+The optional `HELIUS_API_KEY` is reserved for a private RPC URL if the public devnet endpoint becomes unreliable; it is not required for local foundation work.

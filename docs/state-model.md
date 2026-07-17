@@ -25,24 +25,24 @@ TxLINE owns sports facts and cryptographic validation. ProofPlay owns condition 
 
 ## Identifiers
 
-| Identifier | Type | Rule |
-| --- | --- | --- |
-| `fixtureId` | Unsigned integer represented as a decimal string in TypeScript | Must come from the selected TxLINE network |
-| `sequence` | Positive integer | Must be observed in a real score record; zero is invalid |
-| `poolAddress` | Solana public key | Pool PDA derived by the Anchor program |
-| `positionAddress` | Solana public key | Position PDA derived from pool and participant wallet |
-| `conditionCommitment` | 32-byte hash | SHA-256 of the versioned canonical condition document |
-| `compilerVersion` | Positive integer | Selects immutable normalization and compilation semantics |
+| Identifier            | Type                                                           | Rule                                                      |
+| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------- |
+| `fixtureId`           | Unsigned integer represented as a decimal string in TypeScript | Must come from the selected TxLINE network                |
+| `sequence`            | Positive integer                                               | Must be observed in a real score record; zero is invalid  |
+| `poolAddress`         | Solana public key                                              | Pool PDA derived by the Anchor program                    |
+| `positionAddress`     | Solana public key                                              | Position PDA derived from pool and participant wallet     |
+| `conditionCommitment` | 32-byte hash                                                   | SHA-256 of the versioned canonical condition document     |
+| `compilerVersion`     | Positive integer                                               | Selects immutable normalization and compilation semantics |
 
 ## Data source mode
 
 Every match view carries one explicit source mode:
 
-| Mode | Meaning | Verification claim allowed |
-| --- | --- | --- |
-| `live` | Events are arriving from the authenticated TxLINE SSE path | Current values are TxLINE-sourced; settlement still requires final proof |
-| `historicalReplay` | Authenticated TxLINE history is replayed at accelerated speed | Values are historical TxLINE data, not live |
-| `simulated` | Synthetic data exercises the UI or offline fallback | No TxLINE verification claim for the simulated result |
+| Mode               | Meaning                                                       | Verification claim allowed                                               |
+| ------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `live`             | Events are arriving from the authenticated TxLINE SSE path    | Current values are TxLINE-sourced; settlement still requires final proof |
+| `historicalReplay` | Authenticated TxLINE history is replayed at accelerated speed | Values are historical TxLINE data, not live                              |
+| `simulated`        | Synthetic data exercises the UI or offline fallback           | No TxLINE verification claim for the simulated result                    |
 
 Source mode is presentation metadata and is not stored as part of the pool's settlement condition.
 
@@ -64,14 +64,14 @@ stateDiagram-v2
     Finalizing --> Unavailable: final proof cannot be supported
 ```
 
-| ProofPlay state | Examples of TxLINE phase | Product behavior |
-| --- | --- | --- |
-| `scheduled` | Not started | Pools may accept deposits before cutoff |
-| `live` | First half, second half, extra time, penalties | Conditions show provisional status only |
-| `paused` | Halftime, extra-time interval, waiting for penalties | Conditions remain provisional |
-| `finalizing` | Ended phase observed without accepted finalization proof | Deposits closed; settlement pending |
-| `finalized` | `game_finalised`, `statusId=100`, `period=100` | Eligible for proof-backed settlement |
-| `unavailable` | Postponed, cancelled, abandoned, coverage suspended/cancelled | Pool follows retry or refund policy |
+| ProofPlay state | Examples of TxLINE phase                                      | Product behavior                        |
+| --------------- | ------------------------------------------------------------- | --------------------------------------- |
+| `scheduled`     | Not started                                                   | Pools may accept deposits before cutoff |
+| `live`          | First half, second half, extra time, penalties                | Conditions show provisional status only |
+| `paused`        | Halftime, extra-time interval, waiting for penalties          | Conditions remain provisional           |
+| `finalizing`    | Ended phase observed without accepted finalization proof      | Deposits closed; settlement pending     |
+| `finalized`     | `game_finalised`, `statusId=100`, `period=100`                | Eligible for proof-backed settlement    |
+| `unavailable`   | Postponed, cancelled, abandoned, coverage suspended/cancelled | Pool follows retry or refund policy     |
 
 ## Canonical condition
 
@@ -142,14 +142,14 @@ stateDiagram-v2
     Cancelled --> Closed: all positions refunded
 ```
 
-| Durable pool state | Deposits | Settlement | User action |
-| --- | --- | --- | --- |
-| `open` | Allowed before cutoff | Not allowed | Join YES or NO |
-| `locked` | Rejected | Allowed with valid final proof | Wait |
-| `settledYes` | Rejected | Rejected | YES positions claim |
-| `settledNo` | Rejected | Rejected | NO positions claim |
-| `cancelled` | Rejected | Rejected | All positions refund |
-| `closed` | Rejected | Rejected | Read-only receipt/history |
+| Durable pool state | Deposits              | Settlement                     | User action               |
+| ------------------ | --------------------- | ------------------------------ | ------------------------- |
+| `open`             | Allowed before cutoff | Not allowed                    | Join YES or NO            |
+| `locked`           | Rejected              | Allowed with valid final proof | Wait                      |
+| `settledYes`       | Rejected              | Rejected                       | YES positions claim       |
+| `settledNo`        | Rejected              | Rejected                       | NO positions claim        |
+| `cancelled`        | Rejected              | Rejected                       | All positions refund      |
+| `closed`           | Rejected              | Rejected                       | Read-only receipt/history |
 
 ### Pool record
 
@@ -166,7 +166,8 @@ type Pool = {
   noAmount: bigint;
   remainingPoolAmount: bigint;
   remainingWinningStake: bigint;
-  state: "open" | "locked" | "settledYes" | "settledNo" | "cancelled" | "closed";
+  state:
+    "open" | "locked" | "settledYes" | "settledNo" | "cancelled" | "closed";
   settledSequence?: number;
   settlementTransaction?: string;
 };
@@ -178,14 +179,14 @@ The eventual Anchor account layout may use fixed-width integer/public-key fields
 
 One wallet has one aggregate position per pool and side in the MVP. If the program permits deposits on both sides, each side must use a distinct position PDA.
 
-| Position state | Meaning |
-| --- | --- |
-| `active` | Deposit confirmed; pool not resolved |
-| `claimable` | Position is on the winning side |
-| `lost` | Position is on the losing side |
-| `refundable` | Pool was cancelled or has no winning stake |
-| `claimed` | Winner payout completed |
-| `refunded` | Original stake returned |
+| Position state | Meaning                                    |
+| -------------- | ------------------------------------------ |
+| `active`       | Deposit confirmed; pool not resolved       |
+| `claimable`    | Position is on the winning side            |
+| `lost`         | Position is on the losing side             |
+| `refundable`   | Pool was cancelled or has no winning stake |
+| `claimed`      | Winner payout completed                    |
+| `refunded`     | Original stake returned                    |
 
 Client-only `depositPending`, `claimPending`, and `refundPending` states wrap submitted transactions but are not durable program states.
 
@@ -230,15 +231,15 @@ The keeper is permissionless in effect: it may pay transaction fees and transpor
 
 The receipt is a read model assembled from the canonical condition, TxLINE proof metadata, pool account, and finalized transaction.
 
-| Section | Required fields |
-| --- | --- |
-| Market | Pool address, human statement, fixture, cutoff, final state |
-| Condition | Canonical legs, compiler version, commitment, required stat keys |
-| Result | Final sequence, phase/status, relevant verified stat values |
-| Validation | TxLINE network/program, root timestamp/day, predicate result |
-| Settlement | ProofPlay program, transaction, slot/confirmation, winning side |
-| Payout | YES total, NO total, user stake, formula, claimed amount |
-| Provenance | `live`, `historicalReplay`, or `simulated` UI source label |
+| Section    | Required fields                                                  |
+| ---------- | ---------------------------------------------------------------- |
+| Market     | Pool address, human statement, fixture, cutoff, final state      |
+| Condition  | Canonical legs, compiler version, commitment, required stat keys |
+| Result     | Final sequence, phase/status, relevant verified stat values      |
+| Validation | TxLINE network/program, root timestamp/day, predicate result     |
+| Settlement | ProofPlay program, transaction, slot/confirmation, winning side  |
+| Payout     | YES total, NO total, user stake, formula, claimed amount         |
+| Provenance | `live`, `historicalReplay`, or `simulated` UI source label       |
 
 A simulated receipt must be visibly marked and must not display “on-chain verified” unless its validation and settlement fields point to actual matching devnet evidence.
 
