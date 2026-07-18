@@ -31,6 +31,10 @@ KEEPER_WALLET_PATH=/absolute/path/to/devnet-wallet.json \
 
 KEEPER_WALLET_PATH=/absolute/path/to/devnet-wallet.json \
   npm run start --workspace=@proof-play/keeper -- \
+  --watch --interval-ms 30000 --health-port 8788
+
+KEEPER_WALLET_PATH=/absolute/path/to/devnet-wallet.json \
+  npm run start --workspace=@proof-play/keeper -- \
   --once --pool 3fCNRpakrJdsoaG46xFuHqMUK2YZM9FyvwuJediB5PhD
 ```
 
@@ -45,6 +49,10 @@ For every locked pool, the keeper:
 7. emits credential-free JSON logs for pending, retry, terminal, submission, and confirmation states.
 
 `--dry-run` stops after exact proof validation. Re-running against a resolved, cancelled, or closed pool returns `alreadySettled` before proof retrieval or transaction submission. The checked-in [devnet idempotency evidence](evidence/keeper-idempotency-devnet.json) records that behavior against the canonical closed pool.
+
+In watch mode, `--health-port` optionally exposes a credential-free `/healthz`
+endpoint. See the [operations runbook](operations-runbook.md) for its status
+semantics and safe network binding.
 
 ## Proof Receipt
 

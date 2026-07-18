@@ -13,6 +13,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -359,6 +360,8 @@ export function useWallet() {
 export function WalletControl() {
   const wallet = useWallet();
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuId = "proof-play-wallet-menu";
   const shortAddress = wallet.publicKey
     ? `${wallet.publicKey.toBase58().slice(0, 4)}…${wallet.publicKey.toBase58().slice(-4)}`
     : null;
@@ -366,10 +369,13 @@ export function WalletControl() {
   return (
     <div className="wallet-control">
       <button
+        ref={triggerRef}
         className="wallet-control__trigger"
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
+        aria-controls={menuId}
+        aria-haspopup="dialog"
       >
         <span
           className="status-dot"
@@ -385,7 +391,18 @@ export function WalletControl() {
         {shortAddress ?? "Connect wallet"}
       </button>
       {open ? (
-        <div className="wallet-menu">
+        <div
+          className="wallet-menu"
+          id={menuId}
+          role="dialog"
+          aria-label="Wallet connection"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setOpen(false);
+              triggerRef.current?.focus();
+            }
+          }}
+        >
           <div className="wallet-menu__network">
             <span>Network</span>
             <strong>
