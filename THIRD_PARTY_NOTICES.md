@@ -38,7 +38,7 @@ packages in `node_modules` after `npm ci`.
 
 ## Visual assets and marks
 
-`apps/web/public/og.png`, the ProofPlay wordmark treatment, interface graphics,
-and CSS artwork were created for this project. The submission does not use FIFA
-logos, tournament marks, official match photography, or other third-party brand
-assets.
+`apps/web/public/og.png`, the normalized product screenshots under
+`docs/assets/`, the ProofPlay wordmark treatment, interface graphics, and CSS
+artwork were created for this project. The submission does not use FIFA logos,
+tournament marks, official match photography, or other third-party brand assets.
