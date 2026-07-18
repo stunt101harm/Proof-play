@@ -13,11 +13,12 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [Typed TxLINE adapter contract](docs/txline-adapter.md)
 - [Condition compiler v1](docs/condition-compiler.md)
 - [Anchor pool and escrow program](docs/pool-program.md)
+- [Replay, keeper, and Proof Receipt](docs/replay-keeper-receipt.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status
 
-ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository includes the deployable web foundation, TxLINE adapter and condition compiler, plus a devnet Anchor program with SPL-token escrow, TxLINE V3 proof-backed permissionless settlement, deterministic pari-mutuel claims, and cancellation refunds. Product features follow the child issues in the delivery epic.
+ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository includes the deployable web app, a deterministic TxLINE historical replay, a typed TxLINE adapter and condition compiler, a resilient settlement keeper, a human-readable Proof Receipt, and a devnet Anchor program with SPL-token escrow, TxLINE V3 proof-backed permissionless settlement, deterministic pari-mutuel claims, and cancellation refunds. Product features follow the child issues in the delivery epic.
 
 ## Prerequisites
 
@@ -45,6 +46,8 @@ apps/web                  Next.js-compatible web app and server routes
 packages/domain           Shared product and state vocabulary
 packages/txline           TxLINE network and adapter boundary
 packages/condition-engine Versioned condition compiler boundary
+packages/replay           Deterministic normalized match replay
+packages/receipt          Truthful proof receipt construction
 programs/proof_play       Anchor program
 scripts/keeper            Settlement keeper process
 tests                     Cross-workspace tests
@@ -53,24 +56,25 @@ tooling                   Repository validation scripts
 
 ## Common commands
 
-| Command                        | Purpose                                       |
-| ------------------------------ | --------------------------------------------- |
-| `npm run dev`                  | Start the web app                             |
-| `npm run build`                | Build the deployable web worker               |
-| `npm run lint`                 | Lint the web workspace                        |
-| `npm run typecheck`            | Typecheck every TypeScript workspace          |
-| `npm test`                     | Check workspace boundaries and run unit tests |
-| `npm run test:rendered`        | Verify the built app server-renders           |
-| `npm run txline:diagnose`      | Check TxLINE devnet consistency and funding   |
-| `npm run txline:activate`      | Subscribe and activate local TxLINE access    |
-| `npm run txline:recover`       | Recover activation for a confirmed subscribe  |
-| `npm run txline:renew`         | Renew the local guest JWT                     |
-| `npm run txline:verify`        | Exercise every required TxLINE data path      |
-| `npm run anchor:build`         | Build the Anchor program                      |
-| `npm run anchor:test`          | Compile and test the Rust workspace           |
-| `npm run program:verify`       | Exercise the funded lifecycle on devnet       |
-| `npm run program:verify-proof` | Prove production TxLINE settlement on devnet  |
-| `npm run check`                | Run the complete local validation suite       |
+| Command                                                  | Purpose                                       |
+| -------------------------------------------------------- | --------------------------------------------- |
+| `npm run dev`                                            | Start the web app                             |
+| `npm run build`                                          | Build the deployable web worker               |
+| `npm run lint`                                           | Lint the web workspace                        |
+| `npm run typecheck`                                      | Typecheck every TypeScript workspace          |
+| `npm test`                                               | Check workspace boundaries and run unit tests |
+| `npm run test:rendered`                                  | Verify the built app server-renders           |
+| `npm run txline:diagnose`                                | Check TxLINE devnet consistency and funding   |
+| `npm run txline:activate`                                | Subscribe and activate local TxLINE access    |
+| `npm run txline:recover`                                 | Recover activation for a confirmed subscribe  |
+| `npm run txline:renew`                                   | Renew the local guest JWT                     |
+| `npm run txline:verify`                                  | Exercise every required TxLINE data path      |
+| `npm run anchor:build`                                   | Build the Anchor program                      |
+| `npm run anchor:test`                                    | Compile and test the Rust workspace           |
+| `npm run program:verify`                                 | Exercise the funded lifecycle on devnet       |
+| `npm run program:verify-proof`                           | Prove production TxLINE settlement on devnet  |
+| `npm run start --workspace=@proof-play/keeper -- --once` | Run one keeper pass                           |
+| `npm run check`                                          | Run the complete local validation suite       |
 
 ## Environment
 

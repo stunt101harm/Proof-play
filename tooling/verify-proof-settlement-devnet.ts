@@ -65,6 +65,8 @@ if (!WALLET_PATH) {
 type PoolSnapshot = {
   state: unknown;
   winningSide: unknown;
+  yesAmount: BN;
+  noAmount: BN;
   settledSequence: BN;
   remainingPoolAmount: BN;
   remainingWinningStake: BN;
@@ -688,6 +690,7 @@ async function main() {
       conditionCommitmentHex: compiled.conditionCommitmentHex,
       statKeys: compiled.statKeys,
       statement: compiled.humanStatement,
+      legs: compiled.compiledLegs.map((leg) => leg.humanStatement),
     },
     proof: {
       timestampMs: proof.payload.ts,
@@ -714,6 +717,11 @@ async function main() {
       participantFundingSignature,
       finalState: enumName(finalPool.state),
       vaultBalance: finalVault.amount.toString(),
+      yesAmount: finalPool.yesAmount.toString(),
+      noAmount: finalPool.noAmount.toString(),
+      winningStake: (4 * UNIT).toString(),
+      winnerClaimedAmount: (10 * UNIT).toString(),
+      tokenDecimals: TOKEN_DECIMALS,
     },
     settlement: {
       permissionlessSettler: deployer.publicKey.toBase58(),

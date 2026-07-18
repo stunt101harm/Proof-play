@@ -38,11 +38,9 @@ export default function Home() {
             settle the result from cryptographic sports data anchored on Solana.
           </p>
           <div className="hero__actions">
-            <ButtonLink href={productSpec}>
-              Read the product contract
-            </ButtonLink>
-            <ButtonLink href={deliveryEpic} variant="secondary">
-              Follow the build
+            <ButtonLink href="/replay">Run the judge demo</ButtonLink>
+            <ButtonLink href="/receipt" variant="secondary">
+              View verified receipt
             </ButtonLink>
           </div>
           <dl className="hero__limits" aria-label="MVP limits">
@@ -113,7 +111,10 @@ export default function Home() {
 
       <footer>
         <p>Built for the TxLINE World Cup Hackathon.</p>
-        <span>Devnet prototype · No real-money wagering</span>
+        <span>
+          <a href={productSpec}>Product contract</a> ·{" "}
+          <a href={deliveryEpic}>Delivery epic</a> · No real-money wagering
+        </span>
       </footer>
     </main>
   );

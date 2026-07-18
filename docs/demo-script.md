@@ -6,23 +6,20 @@ Demonstrate the complete product and technical value of TxLINE in **3 minutes 50
 
 The recording uses the wallet-free Judge Demo. It links to separately prepared real devnet transactions so the walkthrough remains reliable without misrepresenting simulated deposits as financial actions.
 
-## Demo fixture requirements
+## Seeded demo fixture
 
-Issue [#20](https://github.com/stunt101harm/Proof-play/issues/20) will select the exact covered historical fixture. It should:
+The deterministic replay uses completed TxLINE fixture `18241006` and the real devnet pool `3fCNRpakrJdsoaG46xFuHqMUK2YZM9FyvwuJediB5PhD`. The verified condition is:
 
-- Have a decisive final result.
-- Include enough score and corner updates to make the condition visibly change.
-- Support a valid final TxLINE proof.
-- Produce a compelling two-leg condition such as “Participant 1 wins and total corners are at least nine.”
-- Replay from scheduled to `game_finalised` in 45–50 seconds.
+- Participant 2 wins.
+- Total corners are at most 7.
 
-If no suitable two-leg fixture validates, the demo falls back to a verified single-leg condition rather than fabricating proof support.
+Final sequence `962` proves goals `1–2` and corners `1–6`. The full history replays in a deterministic 75-second window at 1×, or about 19 seconds at 4×. No raw historical feed payload is stored in the repository.
 
 ## Timeline
 
 ### 0:00–0:20 — Problem and promise
 
-**Screen:** ProofPlay home/fixture list.
+**Screen:** ProofPlay home.
 
 **Narration:**
 
@@ -32,7 +29,7 @@ If no suitable two-leg fixture validates, the demo falls back to a verified sing
 
 ### 0:20–0:45 — Choose a TxLINE fixture
 
-**Action:** Open the seeded covered fixture.
+**Action:** Open `/replay`; show the seeded completed fixture and explicit replay/source/network labels.
 
 **Narration:**
 
@@ -44,8 +41,8 @@ If no suitable two-leg fixture validates, the demo falls back to a verified sing
 
 **Action:** Create the two-leg market.
 
-1. Select “Participant 1 wins.”
-2. Add “Total corners at least nine.”
+1. Select “Participant 2 wins.”
+2. Add “Total corners at most seven.”
 3. Open “How this settles.”
 
 **Narration:**
@@ -66,7 +63,7 @@ If no suitable two-leg fixture validates, the demo falls back to a verified sing
 
 ### 1:45–2:35 — Replay the match
 
-**Action:** Start the accelerated replay.
+**Action:** Start at 1×, briefly pause/resume, select 4×, then restart if needed.
 
 **Narration:**
 
@@ -76,7 +73,7 @@ If no suitable two-leg fixture validates, the demo falls back to a verified sing
 
 ### 2:35–3:20 — Validate, settle, and inspect the Proof Receipt
 
-**Action:** Let the keeper transition complete and open the receipt.
+**Action:** Reach `game_finalised`, then open `/receipt`.
 
 **Narration:**
 
