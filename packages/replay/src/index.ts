@@ -15,13 +15,15 @@ export type ReplayTimelineItem = {
   sequence: number;
   sourceUpdatedAt: string;
   action: string;
+  gameState: string | null;
   lifecycle: MatchLifecycle;
   statusId: number | null;
+  period: number | null;
   score: MatchScoreRecord["score"];
 };
 
 export type ReplayState = {
-  sourceMode: "historicalReplay";
+  sourceMode: "live" | "historicalReplay";
   fixtureId: string;
   status: ReplayStatus;
   totalRecords: number;
@@ -30,7 +32,9 @@ export type ReplayState = {
   currentSequence: number | null;
   lifecycle: MatchLifecycle;
   action: string | null;
+  gameState: string | null;
   statusId: number | null;
+  period: number | null;
   score: {
     participant1: ParticipantScore;
     participant2: ParticipantScore;
@@ -174,9 +178,10 @@ export async function* replayScoreRecords(
 export function initialReplayState(
   fixtureId: string,
   totalRecords = 0,
+  sourceMode: ReplayState["sourceMode"] = "historicalReplay",
 ): ReplayState {
   return {
-    sourceMode: "historicalReplay",
+    sourceMode,
     fixtureId,
     status: "idle",
     totalRecords,
@@ -185,7 +190,9 @@ export function initialReplayState(
     currentSequence: null,
     lifecycle: "scheduled",
     action: null,
+    gameState: null,
     statusId: null,
+    period: null,
     score: null,
     stats: {},
     timeline: [],
@@ -224,8 +231,10 @@ export function reduceReplayRecord(
       sequence: record.sequence,
       sourceUpdatedAt: record.sourceUpdatedAt,
       action: record.action,
+      gameState: record.gameState,
       lifecycle: record.lifecycle,
       statusId: record.statusId,
+      period: record.period,
       score: record.score,
     },
   ].slice(-REPLAY_TIMELINE_LIMIT);
@@ -244,7 +253,9 @@ export function reduceReplayRecord(
     currentSequence: record.sequence,
     lifecycle: record.lifecycle,
     action: record.action,
+    gameState: record.gameState,
     statusId: record.statusId,
+    period: record.period,
     score: record.score,
     stats: { ...record.stats },
     timeline,

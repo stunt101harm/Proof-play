@@ -29,7 +29,7 @@ Final sequence `962` proves goals `1–2` and corners `1–6`. The full history 
 
 ### 0:20–0:45 — Choose a TxLINE fixture
 
-**Action:** Open `/replay`; show the seeded completed fixture and explicit replay/source/network labels.
+**Action:** Open `/demo`, select the verified England–Argentina fixture, and point out the fixture ID and proof-ready label. Use `/fixtures` briefly only if the recording needs to establish the wider covered catalog.
 
 **Narration:**
 
@@ -39,7 +39,7 @@ Final sequence `962` proves goals `1–2` and corners `1–6`. The full history 
 
 ### 0:45–1:20 — Build a verifiable condition
 
-**Action:** Create the two-leg market.
+**Action:** Continue to the condition step and create the two-leg market.
 
 1. Select “Participant 2 wins.”
 2. Add “Total corners at most seven.”
@@ -53,7 +53,7 @@ Final sequence `962` proves goals `1–2` and corners `1–6`. The full history 
 
 ### 1:20–1:45 — Join the pool
 
-**Action:** Back YES, then reveal seeded YES/NO participants and pool totals.
+**Action:** Back YES, then reveal seeded YES/NO participants and pool totals. Keep the on-screen `SIMULATED PARTICIPATION` label visible.
 
 **Narration:**
 
@@ -63,7 +63,7 @@ Final sequence `962` proves goals `1–2` and corners `1–6`. The full history 
 
 ### 1:45–2:35 — Replay the match
 
-**Action:** Start at 1×, briefly pause/resume, select 4×, then restart if needed.
+**Action:** Start the preselected 4× replay, briefly pause/resume, then let it reach the final record. Restart only if needed.
 
 **Narration:**
 
@@ -73,7 +73,7 @@ Final sequence `962` proves goals `1–2` and corners `1–6`. The full history 
 
 ### 2:35–3:20 — Validate, settle, and inspect the Proof Receipt
 
-**Action:** Reach `game_finalised`, then open `/receipt`.
+**Action:** Reach `game_finalised`, select “Inspect settlement,” then open the complete `/receipt` from the final demo step.
 
 **Narration:**
 
@@ -105,7 +105,7 @@ Final sequence `962` proves goals `1–2` and corners `1–6`. The full history 
 ## Failure-safe recording plan
 
 - Preload the deployed app and explorer links before recording.
-- Reset and run the entire Judge Demo once in an incognito window.
+- Reset and run the entire `/demo` flow once in an incognito window.
 - Keep a pre-settled receipt route available if the live transaction explorer is slow.
 - Never substitute a simulated verification result for real devnet evidence; clearly state when the UI is replaying a recorded flow.
 - Record one uninterrupted product walkthrough, then re-record only if the golden path or timing fails.

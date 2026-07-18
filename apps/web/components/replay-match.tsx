@@ -10,10 +10,14 @@ import {
 } from "@proof-play/replay";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const FIXTURE_ID = "18241006";
+const DEFAULT_FIXTURE_ID = "18241006";
 const statLabels: Record<string, string> = {
   "1": "P1 goals",
   "2": "P2 goals",
+  "3": "P1 yellow cards",
+  "4": "P2 yellow cards",
+  "5": "P1 red cards",
+  "6": "P2 red cards",
   "7": "P1 corners",
   "8": "P2 corners",
 };
@@ -29,14 +33,36 @@ function scoreValue(value: number | null | undefined) {
   return value ?? "–";
 }
 
-export function ReplayMatch() {
+function displayPhase(value: string | null, lifecycle: string) {
+  if (!value) return lifecycle;
+  return value.replaceAll("_", " ");
+}
+
+export type ReplayMatchProps = {
+  fixtureId?: string;
+  participantNames?: [string, string];
+  conditionStatement?: string;
+  initialSpeed?: ReplaySpeed;
+  onComplete?: () => void;
+  onError?: () => void;
+};
+
+export function ReplayMatch({
+  fixtureId = DEFAULT_FIXTURE_ID,
+  participantNames = ["Participant 1", "Participant 2"],
+  conditionStatement = "Participant 2 wins and total corners are at most 7.",
+  initialSpeed = 1,
+  onComplete,
+  onError,
+}: ReplayMatchProps = {}) {
   const [state, setState] = useState<ReplayState>(() =>
-    initialReplayState(FIXTURE_ID),
+    initialReplayState(fixtureId),
   );
-  const [speed, setSpeed] = useState<ReplaySpeed>(1);
+  const [speed, setSpeed] = useState<ReplaySpeed>(initialSpeed);
   const [meta, setMeta] = useState<ReplayMeta | null>(null);
   const source = useRef<EventSource | null>(null);
   const latestState = useRef(state);
+  const completionSent = useRef(false);
 
   useEffect(() => {
     latestState.current = state;
@@ -52,7 +78,7 @@ export function ReplayMatch() {
       closeSource();
       setState((current) => setReplayStatus(current, "running"));
       const events = new EventSource(
-        `/api/replay/${FIXTURE_ID}?speed=${speed}&afterSequence=${afterSequence}`,
+        `/api/replay/${fixtureId}?speed=${speed}&afterSequence=${afterSequence}`,
       );
       source.current = events;
       events.addEventListener("replay-meta", (event) => {
@@ -70,6 +96,10 @@ export function ReplayMatch() {
         setState((current) =>
           reduceReplayRecord(current, record, current.totalRecords),
         );
+        if (record.isFinal && !completionSent.current) {
+          completionSent.current = true;
+          onComplete?.();
+        }
       });
       events.addEventListener("replay-end", () => {
         setState((current) =>
@@ -91,6 +121,7 @@ export function ReplayMatch() {
             error.message ?? "Replay could not be loaded.",
           ),
         );
+        onError?.();
         closeSource();
       });
       events.onerror = () => {
@@ -107,10 +138,11 @@ export function ReplayMatch() {
                   "Replay connection closed unexpectedly.",
                 ),
           );
+          onError?.();
         }
       };
     },
-    [closeSource, speed],
+    [closeSource, fixtureId, onComplete, onError, speed],
   );
 
   useEffect(() => closeSource, [closeSource]);
@@ -127,7 +159,8 @@ export function ReplayMatch() {
   function restart() {
     closeSource();
     setMeta(null);
-    setState(initialReplayState(FIXTURE_ID));
+    completionSent.current = false;
+    setState(initialReplayState(fixtureId));
     connect(0);
   }
 
@@ -156,8 +189,8 @@ export function ReplayMatch() {
           <label className="sr-only" htmlFor="fixture">
             Replay fixture
           </label>
-          <select id="fixture" value={FIXTURE_ID} disabled>
-            <option value={FIXTURE_ID}>Fixture {FIXTURE_ID}</option>
+          <select id="fixture" value={fixtureId} disabled>
+            <option value={fixtureId}>Fixture {fixtureId}</option>
           </select>
         </div>
         <div className="replay-source">
@@ -168,15 +201,18 @@ export function ReplayMatch() {
 
       <div className="scoreboard">
         <div className="scoreboard__participant">
-          <span>Participant 1</span>
+          <span>{participantNames[0]}</span>
           <strong>{scoreValue(score?.participant1.goals)}</strong>
         </div>
         <div className="scoreboard__state">
-          <span>{state.lifecycle}</span>
-          <small>{state.action ?? "Ready to replay"}</small>
+          <span>{displayPhase(state.gameState, state.lifecycle)}</span>
+          <small>
+            {state.action ?? "Ready to replay"}
+            {state.period !== null ? ` · period ${state.period}` : ""}
+          </small>
         </div>
         <div className="scoreboard__participant scoreboard__participant--right">
-          <span>Participant 2</span>
+          <span>{participantNames[1]}</span>
           <strong>{scoreValue(score?.participant2.goals)}</strong>
         </div>
       </div>
@@ -231,7 +267,7 @@ export function ReplayMatch() {
       <div className="replay-grid">
         <article className="replay-panel">
           <span className="eyebrow">Condition inputs</span>
-          <h2>Participant 2 wins and total corners are at most 7.</h2>
+          <h2>{conditionStatement}</h2>
           <p className="seeded-pool">
             Seeded demo pool · 4 YES / 6 NO demo tokens
           </p>
@@ -262,7 +298,10 @@ export function ReplayMatch() {
                 <li key={item.sequence}>
                   <span>#{item.sequence}</span>
                   <strong>{item.action}</strong>
-                  <small>{item.lifecycle}</small>
+                  <small>
+                    {displayPhase(item.gameState, item.lifecycle)}
+                    {item.period !== null ? ` · period ${item.period}` : ""}
+                  </small>
                 </li>
               ))}
             {!state.timeline.length ? (

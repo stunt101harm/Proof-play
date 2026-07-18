@@ -38,9 +38,9 @@ export default function Home() {
             settle the result from cryptographic sports data anchored on Solana.
           </p>
           <div className="hero__actions">
-            <ButtonLink href="/replay">Run the judge demo</ButtonLink>
-            <ButtonLink href="/receipt" variant="secondary">
-              View verified receipt
+            <ButtonLink href="/demo">Run the judge demo</ButtonLink>
+            <ButtonLink href="/fixtures" variant="secondary">
+              Browse TxLINE matches
             </ButtonLink>
           </div>
           <dl className="hero__limits" aria-label="MVP limits">
@@ -65,9 +65,9 @@ export default function Home() {
             <Badge>Foundation</Badge>
           </div>
           <p className="proof-card__question">
-            Participant 1 wins
+            Argentina wins
             <span>and</span>
-            total corners are at least 9
+            total corners are at most 7
           </p>
           <div className="proof-card__path" aria-label="Verification path">
             <div>
