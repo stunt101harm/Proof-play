@@ -14,6 +14,7 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [Condition compiler v1](docs/condition-compiler.md)
 - [Anchor pool and escrow program](docs/pool-program.md)
 - [Replay, keeper, and Proof Receipt](docs/replay-keeper-receipt.md)
+- [Wallet creation and pool participation](docs/wallet-participation.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status
@@ -25,7 +26,8 @@ ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository
 - `/demo` runs the complete wallet-free judging path against checked devnet evidence.
 - `/fixtures` discovers covered normalized TxLINE fixtures with a transparent replay fallback.
 - `/matches/18241006` shows historical replay or live SSE, available odds, and the verified pool.
-- `/create/18241006` exercises the shared no-code condition builder; wallet-backed pool creation remains a separate participation milestone.
+- `/create/18241006` compiles a condition, estimates the transaction, and creates a real devnet pool with a supported wallet.
+- `/pools/<address>` verifies readable metadata against the on-chain commitment and exposes only valid join, claim, or refund actions.
 - `/receipt` presents the real TxLINE proof, Solana settlement, and payout calculation.
 
 ## Prerequisites
@@ -81,6 +83,7 @@ tooling                   Repository validation scripts
 | `npm run anchor:test`                                    | Compile and test the Rust workspace           |
 | `npm run program:verify`                                 | Exercise the funded lifecycle on devnet       |
 | `npm run program:verify-proof`                           | Prove production TxLINE settlement on devnet  |
+| `npm run demo:fund -- <wallet> 20`                       | Fund a judge wallet with devnet demo tokens   |
 | `npm run start --workspace=@proof-play/keeper -- --once` | Run one keeper pass                           |
 | `npm run check`                                          | Run the complete local validation suite       |
 

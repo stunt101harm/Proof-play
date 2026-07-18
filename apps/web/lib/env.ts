@@ -5,7 +5,7 @@ const DEFAULT_DEMO_TOKEN_MINT = "C6eDfhad3BqR99NxMyvhQf9EGqG9DSe71xVomb4u9H1w";
 
 type Environment = Partial<Record<string, string | undefined>>;
 
-type PublicEnv = {
+export type PublicEnv = {
   demoTokenMint: string;
   proofPlayProgramId: string;
   solanaNetwork: SolanaNetwork;
