@@ -7,6 +7,7 @@ import { LiveScoreMonitor } from "@/components/live-score-monitor";
 import { MatchOdds } from "@/components/match-odds";
 import { ReplayMatch } from "@/components/replay-match";
 import { DEMO_POOL, type SeededFixture } from "@/lib/demo-data";
+import { poolHref } from "@/lib/pool-metadata";
 
 export function MatchCenter({ fixture }: { fixture: SeededFixture }) {
   const [mode, setMode] = useState<"replay" | "live">("replay");
@@ -59,7 +60,11 @@ export function MatchCenter({ fixture }: { fixture: SeededFixture }) {
       <div className="match-lower-grid">
         <MatchOdds fixtureId={fixture.fixtureId} />
         <article className="match-side-panel active-pool-card">
-          <span className="eyebrow">Active prediction pool</span>
+          <span className="eyebrow">
+            {fixture.fixtureId === "18241006"
+              ? "Verified historical pool"
+              : "Active prediction pool"}
+          </span>
           <h2>
             {fixture.fixtureId === "18241006"
               ? DEMO_POOL.statement
@@ -79,7 +84,18 @@ export function MatchCenter({ fixture }: { fixture: SeededFixture }) {
                   <small>demo tokens</small>
                 </div>
               </div>
-              <Link href="/receipt">Open verified Proof Receipt</Link>
+              <Link
+                href={poolHref(DEMO_POOL.address, {
+                  fixtureId: fixture.fixtureId,
+                  canonicalJson: DEMO_POOL.conditionCanonicalJson,
+                  title: "Verified final-whistle pool",
+                  description:
+                    "Inspect the closed production-proof pool and its real devnet state.",
+                  transactionSignature: DEMO_POOL.settlementTransaction,
+                })}
+              >
+                Open on-chain pool
+              </Link>
             </>
           ) : (
             <Link href={`/create/${fixture.fixtureId}`}>Build a condition</Link>

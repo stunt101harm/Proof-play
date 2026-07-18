@@ -35,6 +35,7 @@
     "anchor:test": "cargo test --workspace",
     "program:verify": "node --import tsx tooling/verify-pool-lifecycle-devnet.ts",
     "program:verify-proof": "node --import tsx tooling/verify-proof-settlement-devnet.ts",
+    "demo:fund": "node --import tsx tooling/fund-demo-wallet-devnet.ts",
     "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run security:client-bundle && npm run test:rendered && npm run anchor:test"
   },
   "devDependencies": {

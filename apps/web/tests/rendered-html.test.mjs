@@ -5,8 +5,9 @@ async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
+  const backgroundTasks = [];
 
-  return worker.fetch(
+  const response = await worker.fetch(
     new Request(`http://localhost${path}`, {
       headers: { accept: "text/html" },
     }),
@@ -16,10 +17,21 @@ async function render(path = "/") {
       },
     },
     {
-      waitUntil() {},
+      waitUntil(promise) {
+        backgroundTasks.push(promise);
+      },
       passThroughOnException() {},
     },
   );
+
+  const readText = response.text.bind(response);
+  response.text = async () => {
+    const html = await readText();
+    await Promise.all(backgroundTasks);
+    return html;
+  };
+
+  return response;
 }
 
 test("server-renders the ProofPlay foundation", async () => {
@@ -90,6 +102,8 @@ test("server-renders the reusable condition creator", async () => {
   assert.match(html, /No-code condition/i);
   assert.match(html, /Condition type/i);
   assert.match(html, /Pool title/i);
+  assert.match(html, /Deposit cutoff/i);
+  assert.match(html, /Connect wallet/i);
   assert.match(html, /Compiling the current condition/i);
 });
 
@@ -102,4 +116,22 @@ test("server-renders the wallet-free Judge Demo entry point", async () => {
   assert.match(html, /Select a verified match/i);
   assert.match(html, /simulated participation/i);
   assert.match(html, /Use this fixture/i);
+});
+
+test("server-renders the on-chain pool participation route", async () => {
+  const query = new URLSearchParams({
+    fixture: "18241006",
+    title: "Verified final-whistle pool",
+    condition:
+      '{"fixtureId":"18241006","legs":[{"kind":"participantWins","participant":2},{"comparison":"atMost","kind":"totalCorners","threshold":7}],"operator":"all","version":1}',
+  });
+  const response = await render(
+    `/pools/3fCNRpakrJdsoaG46xFuHqMUK2YZM9FyvwuJediB5PhD?${query.toString()}`,
+  );
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /On-chain prediction pool/i);
+  assert.match(html, /Verified final-whistle pool/i);
+  assert.match(html, /Reading the ProofPlay pool from Solana devnet/i);
+  assert.match(html, /TxLINE credits are never pool collateral/i);
 });

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-import { ConditionBuilder } from "@/components/condition-builder";
 import { SiteNav } from "@/components/site-nav";
+import { WalletPoolCreator } from "@/components/wallet-pool-creator";
 import { seededFixture } from "@/lib/demo-data";
 
 export default async function CreatePoolPage({
@@ -17,7 +17,6 @@ export default async function CreatePoolPage({
     fixture.participants[0].name,
     fixture.participants[1].name,
   ];
-
   return (
     <main>
       <SiteNav label="Pool creator navigation" />
@@ -41,7 +40,7 @@ export default async function CreatePoolPage({
         </strong>
         <Link href={`/matches/${fixtureId}`}>Back to match center</Link>
       </div>
-      <ConditionBuilder fixtureId={fixtureId} participantNames={names} />
+      <WalletPoolCreator fixtureId={fixtureId} participantNames={names} />
       <footer>
         <p>Compiler v1 · one or two AND legs</p>
         <span>Devnet demo tokens have no monetary value</span>

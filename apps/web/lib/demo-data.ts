@@ -94,6 +94,8 @@ export const DEMO_FIXTURE = SEEDED_FIXTURES.at(-1)!;
 export const DEMO_POOL = {
   address: "3fCNRpakrJdsoaG46xFuHqMUK2YZM9FyvwuJediB5PhD",
   statement: "Argentina wins and total corners are at most 7.",
+  conditionCanonicalJson:
+    '{"fixtureId":"18241006","legs":[{"kind":"participantWins","participant":2},{"comparison":"atMost","kind":"totalCorners","threshold":7}],"operator":"all","version":1}',
   participant1FinalScore: 1,
   participant2FinalScore: 2,
   participant1FinalCorners: 1,

@@ -2163,6 +2163,587 @@ textarea:focus-visible,
   margin-left: auto;
 }
 
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.wallet-control {
+  position: relative;
+  z-index: 20;
+}
+
+.wallet-control__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: rgba(131, 240, 189, 0.06);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.wallet-control__trigger:hover {
+  border-color: rgba(131, 240, 189, 0.48);
+}
+
+.status-dot[data-state="connected"] {
+  background: var(--accent);
+  box-shadow: 0 0 14px rgba(131, 240, 189, 0.7);
+}
+
+.status-dot[data-state="error"] {
+  background: #ff9d9d;
+  box-shadow: 0 0 12px rgba(255, 107, 107, 0.46);
+}
+
+.wallet-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  display: grid;
+  width: min(300px, calc(100vw - 30px));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: #0b1c16;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+}
+
+.wallet-menu > button,
+.wallet-menu > a,
+.wallet-menu__empty button {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.67rem;
+  text-align: left;
+  text-decoration: none;
+}
+
+.wallet-menu > a {
+  display: flex;
+  align-items: center;
+}
+
+.wallet-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.wallet-menu__network {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px 11px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.63rem;
+}
+
+.wallet-menu__network span,
+.wallet-menu__empty span {
+  color: var(--muted);
+}
+
+.wallet-menu__empty {
+  display: grid;
+  gap: 8px;
+  padding: 6px 2px;
+  font-size: 0.67rem;
+  line-height: 1.45;
+}
+
+.wallet-menu p {
+  margin: 2px;
+  color: #ffb6b6;
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+
+.transaction-review,
+.pool-experience {
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 28px;
+  background: rgba(8, 27, 20, 0.84);
+  box-shadow: var(--shadow);
+}
+
+.transaction-review {
+  padding: clamp(24px, 5vw, 48px);
+}
+
+.transaction-review__heading,
+.pool-status-strip,
+.transaction-success {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.transaction-review__heading h2,
+.funding-card h2 {
+  margin: 9px 0 0;
+  font-size: clamp(1.8rem, 3.4vw, 3rem);
+  letter-spacing: -0.05em;
+}
+
+.transaction-phase {
+  width: fit-content;
+  padding: 7px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  color: var(--blue);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.transaction-phase[data-phase="ready"],
+.transaction-phase[data-phase="confirmed"] {
+  border-color: rgba(131, 240, 189, 0.36);
+  color: var(--accent);
+}
+
+.transaction-phase[data-phase="failed"] {
+  border-color: rgba(255, 157, 157, 0.3);
+  color: #ffb6b6;
+}
+
+.transaction-review__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.transaction-review dl,
+.position-card dl,
+.pool-chain-card dl,
+.funding-card dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.transaction-review dl div,
+.position-card dl div,
+.pool-chain-card dl div,
+.funding-card dl div {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.transaction-review dt,
+.position-card dt,
+.pool-chain-card dt,
+.funding-card dt,
+.join-estimate dt {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.transaction-review dd,
+.position-card dd,
+.pool-chain-card dd,
+.funding-card dd,
+.join-estimate dd {
+  min-width: 0;
+  margin: 0;
+  color: #d9ede3;
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+
+.transaction-review__commitment {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.transaction-review__commitment > span,
+.transaction-review__commitment small {
+  color: var(--muted);
+  font-size: 0.61rem;
+}
+
+.transaction-review__commitment code {
+  color: var(--accent);
+  font-size: 0.64rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.transaction-review__commitment a {
+  margin-top: 6px;
+  color: var(--blue);
+  font-size: 0.64rem;
+}
+
+.transaction-review__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.transaction-review__actions button {
+  min-height: 46px;
+  padding: 0 18px;
+}
+
+.transaction-review__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.transaction-error,
+.transaction-success {
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 157, 157, 0.25);
+  border-radius: 11px;
+  background: rgba(255, 107, 107, 0.055);
+  color: #ffb6b6;
+  font-size: 0.66rem;
+}
+
+.transaction-error {
+  display: grid;
+}
+
+.transaction-success {
+  border-color: rgba(131, 240, 189, 0.26);
+  background: rgba(131, 240, 189, 0.055);
+  color: var(--text);
+}
+
+.transaction-success > div {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.transaction-success span {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.59rem;
+  text-overflow: ellipsis;
+}
+
+.transaction-success a {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.pool-page-header {
+  min-height: 360px;
+}
+
+.pool-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 120px;
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: rgba(8, 27, 20, 0.8);
+}
+
+.pool-loading--error {
+  align-items: flex-start;
+  flex-direction: column;
+  border-color: rgba(255, 157, 157, 0.25);
+}
+
+.pool-loading button,
+.pool-status-strip button,
+.funding-card button {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.65rem;
+}
+
+.pool-status-strip {
+  min-height: 72px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(131, 240, 189, 0.045);
+}
+
+.pool-status-strip > div {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px 10px;
+  align-items: center;
+}
+
+.pool-status-strip small {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.58rem;
+}
+
+.pool-overview-grid,
+.participation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+}
+
+.pool-contract-card,
+.pool-chain-card,
+.join-card,
+.position-card,
+.funding-card {
+  padding: clamp(22px, 4vw, 38px);
+}
+
+.pool-contract-card,
+.join-card {
+  border-right: 1px solid var(--line);
+}
+
+.pool-contract-card,
+.pool-chain-card,
+.pool-totals,
+.join-card,
+.position-card {
+  border-bottom: 1px solid var(--line);
+}
+
+.pool-contract-card h2,
+.join-card h2,
+.position-card h2 {
+  margin: 10px 0 18px;
+  font-size: clamp(1.45rem, 3vw, 2.3rem);
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+}
+
+.metadata-verification {
+  display: grid;
+  gap: 5px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--blue);
+  font-size: 0.64rem;
+}
+
+.metadata-verification[data-state="verified"] {
+  border-color: rgba(131, 240, 189, 0.28);
+  color: var(--accent);
+}
+
+.metadata-verification[data-state="mismatch"] {
+  border-color: rgba(255, 157, 157, 0.26);
+  color: #ffb6b6;
+}
+
+.metadata-verification small {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.condition-leg-summary {
+  display: grid;
+  gap: 7px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.condition-leg-summary li {
+  padding-left: 16px;
+  color: #d9ede3;
+  font-size: 0.7rem;
+}
+
+.condition-leg-summary li::before {
+  content: "✓";
+  margin-left: -16px;
+  margin-right: 7px;
+  color: var(--accent);
+}
+
+.pool-chain-card > a {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--blue);
+  font-size: 0.66rem;
+}
+
+.pool-totals {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  padding: 22px clamp(22px, 4vw, 38px);
+}
+
+.pool-totals > div {
+  display: grid;
+  gap: 4px;
+}
+
+.pool-totals > div:last-child {
+  text-align: right;
+}
+
+.pool-totals__total {
+  min-width: 170px;
+  padding: 0 28px;
+  border-right: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  text-align: center;
+}
+
+.pool-totals span,
+.pool-totals small {
+  color: var(--muted);
+  font-size: 0.59rem;
+}
+
+.pool-totals strong {
+  font-size: clamp(1.7rem, 3vw, 2.7rem);
+}
+
+.side-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.side-picker button {
+  min-height: 48px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.13);
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 760;
+}
+
+.side-picker button.is-active {
+  border-color: var(--accent);
+  background: rgba(131, 240, 189, 0.08);
+  color: var(--accent);
+}
+
+.side-picker button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.amount-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.amount-field span {
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
+.amount-field input {
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--text);
+}
+
+.join-estimate {
+  display: grid;
+  gap: 0;
+  margin: 18px 0;
+}
+
+.join-estimate div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.field-error,
+.action-explanation,
+.join-card > small,
+.position-card p {
+  color: var(--muted);
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+
+.field-error {
+  color: #ffb6b6;
+}
+
+.join-card .demo-primary,
+.position-card .demo-primary {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.funding-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.65fr) minmax(
+      220px,
+      0.55fr
+    );
+  gap: 28px;
+  align-items: center;
+}
+
+.funding-card p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.funding-card__actions {
+  display: grid;
+  gap: 10px;
+}
+
+.funding-card__actions small {
+  color: var(--muted);
+  font-size: 0.6rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 920px) {
   .hero {
     grid-template-columns: 1fr;
@@ -2225,6 +2806,22 @@ textarea:focus-visible,
   .demo-finish-actions {
     grid-column: 1;
   }
+
+  .transaction-review__grid,
+  .pool-overview-grid,
+  .participation-grid,
+  .funding-card {
+    grid-template-columns: 1fr;
+  }
+
+  .pool-contract-card,
+  .join-card {
+    border-right: 0;
+  }
+
+  .funding-card {
+    align-items: start;
+  }
 }
 
 @media (max-width: 600px) {
@@ -2250,6 +2847,20 @@ textarea:focus-visible,
 
   .site-links a:first-child {
     display: none;
+  }
+
+  .site-nav__actions {
+    gap: 8px;
+  }
+
+  .site-links {
+    display: none;
+  }
+
+  .wallet-control__trigger {
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 0.61rem;
   }
 
   .hero {
@@ -2509,6 +3120,52 @@ textarea:focus-visible,
 
   .demo-finish-actions button {
     margin-left: 0;
+  }
+
+  .transaction-review,
+  .pool-contract-card,
+  .pool-chain-card,
+  .join-card,
+  .position-card,
+  .funding-card {
+    padding: 22px 18px;
+  }
+
+  .transaction-review__heading,
+  .pool-status-strip,
+  .transaction-success {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .transaction-review dl div,
+  .position-card dl div,
+  .pool-chain-card dl div,
+  .funding-card dl div {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .transaction-review__actions {
+    flex-direction: column;
+  }
+
+  .transaction-review__actions button {
+    width: 100%;
+  }
+
+  .pool-totals {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .pool-totals__total {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--line);
+    border-right: 0;
+    border-left: 0;
   }
 }
 

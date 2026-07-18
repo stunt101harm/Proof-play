@@ -5,13 +5,13 @@ import {
   ConditionCompilerError,
   compileCondition,
   type CompiledConditionV1,
+  type TxlineValidationStrategy,
 } from "@proof-play/condition-engine";
 import type {
   ConditionLegV1,
   ParticipantPosition,
   ThresholdComparison,
 } from "@proof-play/domain";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 export type ConfirmedCondition = {
@@ -20,12 +20,17 @@ export type ConfirmedCondition = {
   compilerVersion: number;
   statKeys: number[];
   canonicalJson: string;
+  strategy: TxlineValidationStrategy;
+  title?: string;
+  description?: string;
+  cutoffUnixSeconds?: number;
 };
 
 export type ConditionBuilderProps = {
   fixtureId: string;
   participantNames: [string, string];
   mode?: "creator" | "demo";
+  defaultCutoff?: string;
   onConfirm?: (condition: ConfirmedCondition) => void;
 };
 
@@ -94,6 +99,7 @@ export function ConditionBuilder({
   fixtureId,
   participantNames,
   mode = "creator",
+  defaultCutoff = "",
   onConfirm,
 }: ConditionBuilderProps) {
   const [legs, setLegs] = useState<ConditionLegV1[]>([
@@ -106,8 +112,8 @@ export function ConditionBuilder({
   const [description, setDescription] = useState(
     "Back the complete two-leg condition with demo tokens.",
   );
-  const [cutoff, setCutoff] = useState("2026-07-15T18:45");
-  const [created, setCreated] = useState(false);
+  const [cutoff, setCutoff] = useState(defaultCutoff);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const condition = useMemo(
     () => ({ version: 1, fixtureId, operator: "all", legs }),
@@ -138,7 +144,7 @@ export function ConditionBuilder({
   }, [condition, participantNames]);
 
   function replaceLeg(index: number, leg: ConditionLegV1) {
-    setCreated(false);
+    setFormError(null);
     setLegs((current) =>
       current.map((candidate, candidateIndex) =>
         candidateIndex === index ? leg : candidate,
@@ -148,15 +154,39 @@ export function ConditionBuilder({
 
   function confirm() {
     if (!compiled) return;
+    const cutoffUnixSeconds = Math.floor(Date.parse(`${cutoff}Z`) / 1_000);
+    if (mode === "creator") {
+      if (!title.trim()) {
+        setFormError("Enter a pool title before reviewing the transaction.");
+        return;
+      }
+      if (
+        !Number.isSafeInteger(cutoffUnixSeconds) ||
+        cutoffUnixSeconds <= Math.floor(Date.now() / 1_000) + 60
+      ) {
+        setFormError(
+          "Deposit cutoff must be at least one minute in the future.",
+        );
+        return;
+      }
+    }
     const confirmed: ConfirmedCondition = {
       statement: compiled.humanStatement,
       conditionCommitmentHex: compiled.conditionCommitmentHex,
       compilerVersion: compiled.compilerVersion,
       statKeys: compiled.statKeys,
       canonicalJson: compiled.canonicalJson,
+      strategy: compiled.strategy,
+      ...(mode === "creator"
+        ? {
+            title: title.trim(),
+            description: description.trim(),
+            cutoffUnixSeconds,
+          }
+        : {}),
     };
-    if (onConfirm) onConfirm(confirmed);
-    else setCreated(true);
+    setFormError(null);
+    onConfirm?.(confirmed);
   }
 
   return (
@@ -181,7 +211,10 @@ export function ConditionBuilder({
               <span>Pool title</span>
               <input
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => {
+                  setTitle(event.target.value);
+                  setFormError(null);
+                }}
                 maxLength={60}
               />
             </label>
@@ -190,14 +223,30 @@ export function ConditionBuilder({
               <input
                 type="datetime-local"
                 value={cutoff}
-                onChange={(event) => setCutoff(event.target.value)}
+                onFocus={() => {
+                  if (!cutoff) {
+                    setFormError(null);
+                    setCutoff(
+                      new Date(Date.now() + 60 * 60 * 1_000)
+                        .toISOString()
+                        .slice(0, 16),
+                    );
+                  }
+                }}
+                onChange={(event) => {
+                  setCutoff(event.target.value);
+                  setFormError(null);
+                }}
               />
             </label>
             <label className="pool-details__description">
               <span>Description · optional</span>
               <textarea
                 value={description}
-                onChange={(event) => setDescription(event.target.value)}
+                onChange={(event) => {
+                  setDescription(event.target.value);
+                  setFormError(null);
+                }}
                 maxLength={180}
               />
             </label>
@@ -301,7 +350,7 @@ export function ConditionBuilder({
                   className="leg-editor__remove"
                   type="button"
                   onClick={() => {
-                    setCreated(false);
+                    setFormError(null);
                     setLegs((current) =>
                       current.filter(
                         (_, candidateIndex) => candidateIndex !== index,
@@ -320,9 +369,10 @@ export function ConditionBuilder({
           <button
             className="add-leg"
             type="button"
-            onClick={() =>
-              setLegs((current) => [...current, defaultLeg("totalCorners")])
-            }
+            onClick={() => {
+              setFormError(null);
+              setLegs((current) => [...current, defaultLeg("totalCorners")]);
+            }}
           >
             + Add an AND condition
           </button>
@@ -361,13 +411,12 @@ export function ConditionBuilder({
             <button className="builder-confirm" type="button" onClick={confirm}>
               {mode === "demo"
                 ? "Use this condition"
-                : "Create Judge Demo pool"}
+                : "Review devnet transaction"}
             </button>
             {mode === "creator" ? (
               <small className="builder-disclaimer">
-                Demo creation signs nothing and transfers no asset.
-                Wallet-backed devnet creation is completed with the
-                participation flow.
+                The next step estimates the fee and asks the connected wallet to
+                create a real devnet pool. Demo tokens have no monetary value.
               </small>
             ) : null}
           </>
@@ -377,14 +426,10 @@ export function ConditionBuilder({
             <p>{compileError ?? "Compiling the current condition…"}</p>
           </div>
         )}
-        {created && compiled ? (
-          <div className="created-callout">
-            <strong>Demo pool prepared</strong>
-            <span>
-              “{title}” uses compiler v{compiled.compilerVersion}; no
-              transaction was represented as real.
-            </span>
-            <Link href="/demo">Continue through the Judge Demo</Link>
+        {formError ? (
+          <div className="compile-error" role="alert">
+            <strong>Pool details need attention</strong>
+            <p>{formError}</p>
           </div>
         ) : null}
       </aside>
