@@ -237,13 +237,18 @@ The asset is a dedicated, clearly labelled devnet demo token. TxLINE subscriptio
 
 These questions do not change the frozen product contract and have explicit owners:
 
-| Question                                                                                           | Owning issue                                                                                                                | Required decision                              |
-| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Which covered historical fixture provides the strongest verified replay?                           | [#20](https://github.com/stunt101harm/Proof-play/issues/20)                                                                 | Before Judge Demo seeding                      |
-| Does the deployed TxLINE devnet interface support direct program CPI for the selected V2 strategy? | [#15](https://github.com/stunt101harm/Proof-play/issues/15)                                                                 | Before settlement implementation is finalized  |
-| Which demo-token program/mint and funding flow will be used?                                       | [#22](https://github.com/stunt101harm/Proof-play/issues/22) and [#24](https://github.com/stunt101harm/Proof-play/issues/24) | Before devnet participation testing            |
-| Where will the SSE proxy and keeper run persistently?                                              | [#2](https://github.com/stunt101harm/Proof-play/issues/2)                                                                   | Before production deployment                   |
-| What historical data may be cached for replay under the hackathon license?                         | [#20](https://github.com/stunt101harm/Proof-play/issues/20) and [#14](https://github.com/stunt101harm/Proof-play/issues/14) | Before committing or deploying replay material |
+| Question                                                                   | Owning issue                                                                                                                | Required decision                              |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Which covered historical fixture provides the strongest verified replay?   | [#20](https://github.com/stunt101harm/Proof-play/issues/20)                                                                 | Before Judge Demo seeding                      |
+| Which demo-token program/mint and funding flow will be used?               | [#22](https://github.com/stunt101harm/Proof-play/issues/22) and [#24](https://github.com/stunt101harm/Proof-play/issues/24) | Before devnet participation testing            |
+| Where will the SSE proxy and keeper run persistently?                      | [#2](https://github.com/stunt101harm/Proof-play/issues/2)                                                                   | Before production deployment                   |
+| What historical data may be cached for replay under the hackathon license? | [#20](https://github.com/stunt101harm/Proof-play/issues/20) and [#14](https://github.com/stunt101harm/Proof-play/issues/14) | Before committing or deploying replay material |
+
+Issue #15 resolved the settlement-interface question: TxLINE devnet exposes
+direct `validate_stat_v3` CPI with a compact multiproof and boolean return
+value. ProofPlay pins that program and an immutable compiler-v1 strategy per
+pool; the current interface does not include the API sequence/action fields,
+which remain explicitly labelled off-chain metadata.
 
 ## Release boundary
 

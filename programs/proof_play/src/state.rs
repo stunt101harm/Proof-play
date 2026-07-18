@@ -1,6 +1,12 @@
 use anchor_lang::prelude::*;
 
-use crate::errors::ProofPlayError;
+use crate::{
+    errors::ProofPlayError,
+    txline::{
+        NDimensionalStrategy, StatValidationInputV3, FINAL_MATCH_PERIOD, MAX_SETTLEMENT_STATS,
+        TXLINE_PROGRAM_ID,
+    },
+};
 
 pub const MIN_SETTLEMENT_GRACE_SECONDS: i64 = 3_600;
 
@@ -29,6 +35,143 @@ pub struct CreatePoolParams {
     pub cutoff_unix_seconds: i64,
     pub refund_after_unix_seconds: i64,
     pub demo_mode: bool,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
+pub struct SettlementConfigParams {
+    pub stat_keys: Vec<u32>,
+    pub strategy: NDimensionalStrategy,
+}
+
+#[account]
+#[derive(Debug, InitSpace)]
+pub struct SettlementConfig {
+    pub pool: Pubkey,
+    pub condition_commitment: [u8; 32],
+    pub compiler_version: u16,
+    #[max_len(4)]
+    pub stat_keys: Vec<u32>,
+    pub strategy: NDimensionalStrategy,
+    pub bump: u8,
+}
+
+impl SettlementConfig {
+    pub fn initialize(
+        &mut self,
+        pool: Pubkey,
+        condition_commitment: [u8; 32],
+        compiler_version: u16,
+        params: &SettlementConfigParams,
+        bump: u8,
+    ) -> Result<()> {
+        require!(
+            !params.stat_keys.is_empty() && params.stat_keys.len() <= MAX_SETTLEMENT_STATS,
+            ProofPlayError::InvalidSettlementConfig
+        );
+        require!(
+            params
+                .stat_keys
+                .iter()
+                .all(|key| matches!(*key, 1 | 2 | 7 | 8))
+                && params.stat_keys.windows(2).all(|keys| keys[0] < keys[1]),
+            ProofPlayError::InvalidSettlementConfig
+        );
+        require!(
+            params.strategy.geometric_targets.is_empty()
+                && params.strategy.distance_predicate.is_none()
+                && !params.strategy.discrete_predicates.is_empty()
+                && params.strategy.discrete_predicates.len() <= MAX_SETTLEMENT_STATS,
+            ProofPlayError::UnsupportedSettlementStrategy
+        );
+
+        let mut coverage = [0_u8; MAX_SETTLEMENT_STATS];
+        for predicate in &params.strategy.discrete_predicates {
+            let (indexes, count) = predicate.indexes();
+            for index in indexes.iter().take(count) {
+                require!(
+                    *index < params.stat_keys.len(),
+                    ProofPlayError::SettlementIndexOutOfBounds
+                );
+                coverage[*index] = coverage[*index]
+                    .checked_add(1)
+                    .ok_or(ProofPlayError::MathOverflow)?;
+            }
+        }
+        require!(
+            coverage[..params.stat_keys.len()]
+                .iter()
+                .all(|count| *count == 1),
+            ProofPlayError::InvalidSettlementCoverage
+        );
+
+        self.pool = pool;
+        self.condition_commitment = condition_commitment;
+        self.compiler_version = compiler_version;
+        self.stat_keys.clone_from(&params.stat_keys);
+        self.strategy.clone_from(&params.strategy);
+        self.bump = bump;
+        Ok(())
+    }
+
+    pub fn validate_payload(
+        &self,
+        pool_key: Pubkey,
+        pool: &Pool,
+        payload: &StatValidationInputV3,
+        strategy: &NDimensionalStrategy,
+    ) -> Result<()> {
+        require_keys_eq!(
+            self.pool,
+            pool_key,
+            ProofPlayError::SettlementConfigMismatch
+        );
+        require!(
+            self.condition_commitment == pool.condition_commitment
+                && self.compiler_version == pool.compiler_version,
+            ProofPlayError::SettlementConfigMismatch
+        );
+        require!(
+            strategy == &self.strategy,
+            ProofPlayError::SettlementStrategyMismatch
+        );
+        require!(
+            payload.fixture_summary.fixture_id == pool.fixture_id,
+            ProofPlayError::SettlementFixtureMismatch
+        );
+        require!(
+            payload.ts >= 0
+                && payload.ts == payload.fixture_summary.update_stats.min_timestamp
+                && payload.fixture_summary.update_stats.update_count > 0
+                && payload.fixture_summary.update_stats.min_timestamp
+                    <= payload.fixture_summary.update_stats.max_timestamp,
+            ProofPlayError::InvalidProofTimestamp
+        );
+        require!(
+            payload.event_stat_root.iter().any(|byte| *byte != 0)
+                && payload
+                    .fixture_summary
+                    .events_sub_tree_root
+                    .iter()
+                    .any(|byte| *byte != 0),
+            ProofPlayError::InvalidProofRoot
+        );
+        require!(
+            payload.leaves.len() == self.stat_keys.len()
+                && payload.leaf_indices.len() == self.stat_keys.len(),
+            ProofPlayError::SettlementStatMismatch
+        );
+        for (leaf, expected_key) in payload.leaves.iter().zip(&self.stat_keys) {
+            require!(
+                leaf.stat.key == *expected_key,
+                ProofPlayError::SettlementStatMismatch
+            );
+            require!(
+                leaf.stat.period == FINAL_MATCH_PERIOD,
+                ProofPlayError::NonFinalSettlementProof
+            );
+        }
+        Ok(())
+    }
 }
 
 #[account]
@@ -142,6 +285,14 @@ impl Pool {
 
     pub fn record_demo_outcome(&mut self, side: PoolSide, sequence: u64) -> Result<()> {
         require!(self.demo_mode, ProofPlayError::UnverifiedSettlementDisabled);
+        self.record_outcome(side, sequence)
+    }
+
+    pub fn record_verified_outcome(&mut self, side: PoolSide, sequence: u64) -> Result<()> {
+        self.record_outcome(side, sequence)
+    }
+
+    fn record_outcome(&mut self, side: PoolSide, sequence: u64) -> Result<()> {
         require!(
             self.state == PoolState::Locked,
             ProofPlayError::PoolNotLocked
@@ -272,6 +423,83 @@ impl Pool {
 
 #[account]
 #[derive(Debug, InitSpace)]
+pub struct SettlementRecord {
+    pub pool: Pubkey,
+    pub settlement_config: Pubkey,
+    pub condition_commitment: [u8; 32],
+    pub compiler_version: u16,
+    pub txline_program: Pubkey,
+    pub daily_scores_root: Pubkey,
+    pub proof_timestamp_ms: i64,
+    pub observed_sequence: u64,
+    pub event_stat_root: [u8; 32],
+    pub stat_keys: [u32; MAX_SETTLEMENT_STATS],
+    pub stat_values: [i32; MAX_SETTLEMENT_STATS],
+    pub stat_periods: [i32; MAX_SETTLEMENT_STATS],
+    pub stat_count: u8,
+    pub predicate_result: bool,
+    pub winning_side: PoolSide,
+    pub settled_at: i64,
+    pub bump: u8,
+}
+
+pub struct SettlementRecordInput<'a> {
+    pub pool: Pubkey,
+    pub settlement_config: Pubkey,
+    pub config: &'a SettlementConfig,
+    pub daily_scores_root: Pubkey,
+    pub payload: &'a StatValidationInputV3,
+    pub observed_sequence: u64,
+    pub predicate_result: bool,
+    pub settled_at: i64,
+    pub bump: u8,
+}
+
+impl SettlementRecord {
+    pub fn initialize(&mut self, input: SettlementRecordInput<'_>) -> Result<()> {
+        require!(input.observed_sequence > 0, ProofPlayError::InvalidSequence);
+        let stat_count: u8 = input
+            .payload
+            .leaves
+            .len()
+            .try_into()
+            .map_err(|_| ProofPlayError::SettlementStatMismatch)?;
+        let mut stat_keys = [0_u32; MAX_SETTLEMENT_STATS];
+        let mut stat_values = [0_i32; MAX_SETTLEMENT_STATS];
+        let mut stat_periods = [0_i32; MAX_SETTLEMENT_STATS];
+        for (index, leaf) in input.payload.leaves.iter().enumerate() {
+            stat_keys[index] = leaf.stat.key;
+            stat_values[index] = leaf.stat.value;
+            stat_periods[index] = leaf.stat.period;
+        }
+
+        self.pool = input.pool;
+        self.settlement_config = input.settlement_config;
+        self.condition_commitment = input.config.condition_commitment;
+        self.compiler_version = input.config.compiler_version;
+        self.txline_program = TXLINE_PROGRAM_ID;
+        self.daily_scores_root = input.daily_scores_root;
+        self.proof_timestamp_ms = input.payload.ts;
+        self.observed_sequence = input.observed_sequence;
+        self.event_stat_root = input.payload.event_stat_root;
+        self.stat_keys = stat_keys;
+        self.stat_values = stat_values;
+        self.stat_periods = stat_periods;
+        self.stat_count = stat_count;
+        self.predicate_result = input.predicate_result;
+        self.winning_side = if input.predicate_result {
+            PoolSide::Yes
+        } else {
+            PoolSide::No
+        };
+        self.settled_at = input.settled_at;
+        self.bump = input.bump;
+        Ok(())
+    }
+}
+
+#[account]
+#[derive(Debug, InitSpace)]
 pub struct Position {
     pub pool: Pubkey,
     pub owner: Pubkey,
@@ -319,6 +547,10 @@ impl Position {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::txline::{
+        BinaryExpression, Comparison, ProofNode, ScoreStat, ScoresBatchSummary, ScoresUpdateStats,
+        StatLeaf, StatPredicate, TraderPredicate,
+    };
     use anchor_lang::error::{Error, ERROR_CODE_OFFSET};
 
     const NOW: i64 = 1_700_000_000;
@@ -371,6 +603,93 @@ mod tests {
         pool
     }
 
+    fn settlement_strategy() -> NDimensionalStrategy {
+        NDimensionalStrategy {
+            geometric_targets: vec![],
+            distance_predicate: None,
+            discrete_predicates: vec![
+                StatPredicate::Binary {
+                    index_a: 1,
+                    index_b: 0,
+                    op: BinaryExpression::Subtract,
+                    predicate: TraderPredicate {
+                        threshold: 0,
+                        comparison: Comparison::GreaterThan,
+                    },
+                },
+                StatPredicate::Binary {
+                    index_a: 2,
+                    index_b: 3,
+                    op: BinaryExpression::Add,
+                    predicate: TraderPredicate {
+                        threshold: 8,
+                        comparison: Comparison::LessThan,
+                    },
+                },
+            ],
+        }
+    }
+
+    fn settlement_params() -> SettlementConfigParams {
+        SettlementConfigParams {
+            stat_keys: vec![1, 2, 7, 8],
+            strategy: settlement_strategy(),
+        }
+    }
+
+    fn blank_settlement_config() -> SettlementConfig {
+        SettlementConfig {
+            pool: Pubkey::default(),
+            condition_commitment: [0; 32],
+            compiler_version: 0,
+            stat_keys: vec![],
+            strategy: NDimensionalStrategy {
+                geometric_targets: vec![],
+                distance_predicate: None,
+                discrete_predicates: vec![],
+            },
+            bump: 0,
+        }
+    }
+
+    fn settlement_payload(fixture_id: i64) -> StatValidationInputV3 {
+        const PROOF_TIMESTAMP: i64 = 1_784_150_064_772;
+        StatValidationInputV3 {
+            ts: PROOF_TIMESTAMP,
+            fixture_summary: ScoresBatchSummary {
+                fixture_id,
+                update_stats: ScoresUpdateStats {
+                    update_count: 1,
+                    min_timestamp: PROOF_TIMESTAMP,
+                    max_timestamp: PROOF_TIMESTAMP,
+                },
+                events_sub_tree_root: [2; 32],
+            },
+            fixture_proof: vec![ProofNode {
+                hash: [3; 32],
+                is_right_sibling: true,
+            }],
+            main_tree_proof: vec![ProofNode {
+                hash: [4; 32],
+                is_right_sibling: false,
+            }],
+            event_stat_root: [5; 32],
+            leaves: [(1, 1), (2, 2), (7, 1), (8, 6)]
+                .into_iter()
+                .map(|(key, value)| StatLeaf {
+                    stat: ScoreStat {
+                        key,
+                        value,
+                        period: FINAL_MATCH_PERIOD,
+                    },
+                    stat_proof: vec![],
+                })
+                .collect(),
+            multiproof_hashes: vec![],
+            leaf_indices: vec![32, 33, 36, 37],
+        }
+    }
+
     fn position(pool: Pubkey, owner: Pubkey, side: PoolSide, amount: u64) -> Position {
         Position {
             pool,
@@ -392,6 +711,102 @@ mod tests {
             panic!("expected Anchor error")
         };
         assert_eq!(error.error_code_number, ERROR_CODE_OFFSET + expected as u32);
+    }
+
+    #[test]
+    fn immutable_settlement_config_binds_the_pool_strategy_and_final_payload() {
+        let pool_key = Pubkey::new_unique();
+        let pool = initialized_pool(false);
+        let params = settlement_params();
+        let mut config = blank_settlement_config();
+        config
+            .initialize(
+                pool_key,
+                pool.condition_commitment,
+                pool.compiler_version,
+                &params,
+                252,
+            )
+            .unwrap();
+        let payload = settlement_payload(pool.fixture_id);
+        config
+            .validate_payload(pool_key, &pool, &payload, &params.strategy)
+            .unwrap();
+
+        let mut altered_strategy = params.strategy.clone();
+        let StatPredicate::Binary { predicate, .. } = &mut altered_strategy.discrete_predicates[1]
+        else {
+            panic!("expected binary predicate")
+        };
+        predicate.threshold = 9;
+        assert_error(
+            config.validate_payload(pool_key, &pool, &payload, &altered_strategy),
+            ProofPlayError::SettlementStrategyMismatch,
+        );
+
+        let mut altered_fixture = payload.clone();
+        altered_fixture.fixture_summary.fixture_id += 1;
+        assert_error(
+            config.validate_payload(pool_key, &pool, &altered_fixture, &params.strategy),
+            ProofPlayError::SettlementFixtureMismatch,
+        );
+
+        let mut non_final = payload.clone();
+        non_final.leaves[0].stat.period = 0;
+        assert_error(
+            config.validate_payload(pool_key, &pool, &non_final, &params.strategy),
+            ProofPlayError::NonFinalSettlementProof,
+        );
+    }
+
+    #[test]
+    fn settlement_config_rejects_missing_duplicate_and_out_of_range_coverage() {
+        let pool_key = Pubkey::new_unique();
+        let pool = initialized_pool(false);
+
+        let mut duplicate_keys = settlement_params();
+        duplicate_keys.stat_keys = vec![1, 2, 2, 8];
+        assert_error(
+            blank_settlement_config().initialize(
+                pool_key,
+                pool.condition_commitment,
+                pool.compiler_version,
+                &duplicate_keys,
+                1,
+            ),
+            ProofPlayError::InvalidSettlementConfig,
+        );
+
+        let mut missing_coverage = settlement_params();
+        missing_coverage.strategy.discrete_predicates.pop();
+        assert_error(
+            blank_settlement_config().initialize(
+                pool_key,
+                pool.condition_commitment,
+                pool.compiler_version,
+                &missing_coverage,
+                1,
+            ),
+            ProofPlayError::InvalidSettlementCoverage,
+        );
+
+        let mut out_of_range = settlement_params();
+        let StatPredicate::Binary { index_b, .. } =
+            &mut out_of_range.strategy.discrete_predicates[1]
+        else {
+            panic!("expected binary predicate")
+        };
+        *index_b = 4;
+        assert_error(
+            blank_settlement_config().initialize(
+                pool_key,
+                pool.condition_commitment,
+                pool.compiler_version,
+                &out_of_range,
+                1,
+            ),
+            ProofPlayError::SettlementIndexOutOfBounds,
+        );
     }
 
     #[test]

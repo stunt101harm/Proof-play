@@ -395,7 +395,7 @@ describe("TxLINE strategy compilation", () => {
     },
   );
 
-  it("compiles a bounded AND compound into one stable four-stat V2 strategy", async () => {
+  it("compiles a bounded AND compound into one stable four-stat V3 strategy", async () => {
     const compiled = await compileCondition(
       condition([
         { kind: "totalCorners", comparison: "atMost", threshold: 7 },
@@ -403,7 +403,7 @@ describe("TxLINE strategy compilation", () => {
       ]),
     );
 
-    expect(compiled.validationMethod).toBe("validateStatV2");
+    expect(compiled.validationMethod).toBe("validateStatV3");
     expect(compiled.statKeys).toEqual([
       TXLINE_STAT_KEYS.participant1Goals,
       TXLINE_STAT_KEYS.participant2Goals,

@@ -22,6 +22,7 @@ The `@proof-play/txline` package is the only application layer that understands 
 | `getHistoricalScores`         | `GET /api/scores/historical/{fixtureId}` | `MatchScoreRecord[]`                       |
 | `streamScores`                | `GET /api/scores/stream`                 | ordered async stream of `MatchScoreRecord` |
 | `getScoreProof`               | `GET /api/scores/stat-validation`        | server-side `TxlineScoreProof`             |
+| `getScoreProofV3`             | `GET /api/scores/stat-validation-v3`     | compact on-chain `TxlineScoreProofV3`      |
 
 `getFixture` filters the documented fixture snapshot because TxLINE does not expose a separate fixture-detail endpoint. Callers can supply `startEpochDay` and `competitionId` to select the correct snapshot window.
 
@@ -34,7 +35,13 @@ Every normalized fixture, odds market, and score record includes:
 - ISO timestamps derived from TxLINE millisecond timestamps; and
 - only stable fields required by downstream ProofPlay components.
 
-Score records additionally preserve the observed sequence, source action, raw game state, numeric phase/status, participant designation, clock, full numeric stat-key map, relevant score summary, amendment summary, and derived ProofPlay lifecycle. Only `action=game_finalised` with `statusId=100` is normalized as final. The current devnet final record does not expose a separate top-level `period` field, so it remains `null` rather than being invented.
+Score records additionally preserve the observed sequence, source action, raw game state, numeric phase/status, participant designation, clock, full numeric stat-key map, relevant score summary, amendment summary, and derived ProofPlay lifecycle. Only `action=game_finalised` with `statusId=100` is normalized as final. The current devnet final record does not expose a separate top-level `period` field, so it remains `null` rather than being invented. Settlement separately requires every proven V3 stat leaf to carry full-game period `100`.
+
+`getScoreProofV3` preserves only the byte-array hashes accepted by Anchor and
+normalizes TxLINE's compact leaves, multiproof hashes, and leaf indices directly
+into the `validate_stat_v3` argument shape. The requested sequence remains
+explicit metadata because the V3 on-chain payload commits to the event root but
+does not include a sequence field.
 
 Odds normalization creates outcomes only from the arrays TxLINE returns for that market. `Pct: "NA"` becomes `probabilityPercent: null`; the adapter does not manufacture a probability or an unsupported market.
 

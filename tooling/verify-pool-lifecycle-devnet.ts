@@ -84,6 +84,13 @@ function vaultAddress(programId: PublicKey, pool: PublicKey) {
   )[0];
 }
 
+function settlementConfigAddress(programId: PublicKey, pool: PublicKey) {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("settlement_config"), pool.toBuffer()],
+    programId,
+  )[0];
+}
+
 function positionAddress(
   programId: PublicKey,
   pool: PublicKey,
@@ -232,6 +239,10 @@ async function main() {
     basePoolId,
   );
   const firstVault = vaultAddress(program.programId, firstPool);
+  const firstSettlementConfig = settlementConfigAddress(
+    program.programId,
+    firstPool,
+  );
   const deployerPosition = positionAddress(
     program.programId,
     firstPool,
@@ -247,19 +258,23 @@ async function main() {
   const refundAfter = cutoff + MIN_SETTLEMENT_GRACE_SECONDS;
 
   const createSignature = await program.methods
-    .createPool({
-      poolId: basePoolId,
-      fixtureId: new BN(compiled.fixtureId),
-      conditionCommitment: Array.from(compiled.conditionCommitment),
-      compilerVersion: 1,
-      cutoffUnixSeconds: new BN(cutoff),
-      refundAfterUnixSeconds: new BN(refundAfter),
-      demoMode: true,
-    })
+    .createPool(
+      {
+        poolId: basePoolId,
+        fixtureId: new BN(compiled.fixtureId),
+        conditionCommitment: Array.from(compiled.conditionCommitment),
+        compilerVersion: 1,
+        cutoffUnixSeconds: new BN(cutoff),
+        refundAfterUnixSeconds: new BN(refundAfter),
+        demoMode: true,
+      },
+      { statKeys: compiled.statKeys, strategy: compiled.strategy },
+    )
     .accountsStrict({
       creator: deployer.publicKey,
       pool: firstPool,
       vault: firstVault,
+      settlementConfig: firstSettlementConfig,
       tokenMint: mint,
       tokenProgram: TOKEN_PROGRAM_ID,
       systemProgram: SystemProgram.programId,
@@ -398,6 +413,10 @@ async function main() {
     secondPoolId,
   );
   const secondVault = vaultAddress(program.programId, secondPool);
+  const secondSettlementConfig = settlementConfigAddress(
+    program.programId,
+    secondPool,
+  );
   const secondPosition = positionAddress(
     program.programId,
     secondPool,
@@ -406,21 +425,25 @@ async function main() {
   const secondNow = await chainTimestamp(connection);
   const secondCutoff = secondNow + 60;
   const secondCreateSignature = await program.methods
-    .createPool({
-      poolId: secondPoolId,
-      fixtureId: new BN(compiled.fixtureId),
-      conditionCommitment: Array.from(compiled.conditionCommitment),
-      compilerVersion: 1,
-      cutoffUnixSeconds: new BN(secondCutoff),
-      refundAfterUnixSeconds: new BN(
-        secondCutoff + MIN_SETTLEMENT_GRACE_SECONDS,
-      ),
-      demoMode: true,
-    })
+    .createPool(
+      {
+        poolId: secondPoolId,
+        fixtureId: new BN(compiled.fixtureId),
+        conditionCommitment: Array.from(compiled.conditionCommitment),
+        compilerVersion: 1,
+        cutoffUnixSeconds: new BN(secondCutoff),
+        refundAfterUnixSeconds: new BN(
+          secondCutoff + MIN_SETTLEMENT_GRACE_SECONDS,
+        ),
+        demoMode: true,
+      },
+      { statKeys: compiled.statKeys, strategy: compiled.strategy },
+    )
     .accountsStrict({
       creator: deployer.publicKey,
       pool: secondPool,
       vault: secondVault,
+      settlementConfig: secondSettlementConfig,
       tokenMint: mint,
       tokenProgram: TOKEN_PROGRAM_ID,
       systemProgram: SystemProgram.programId,

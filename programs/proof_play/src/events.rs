@@ -17,6 +17,15 @@ pub struct PoolCreated {
 }
 
 #[event]
+pub struct SettlementConfigCreated {
+    pub pool: Pubkey,
+    pub settlement_config: Pubkey,
+    pub compiler_version: u16,
+    pub condition_commitment: [u8; 32],
+    pub stat_keys: Vec<u32>,
+}
+
+#[event]
 pub struct PoolJoined {
     pub pool: Pubkey,
     pub owner: Pubkey,
@@ -41,6 +50,25 @@ pub struct DemoOutcomeRecorded {
     pub resulting_state: PoolState,
     pub remaining_pool_amount: u64,
     pub remaining_winning_stake: u64,
+}
+
+#[event]
+pub struct PoolSettledFromTxline {
+    pub pool: Pubkey,
+    pub settlement_record: Pubkey,
+    pub settler: Pubkey,
+    pub txline_program: Pubkey,
+    pub daily_scores_root: Pubkey,
+    pub proof_timestamp_ms: i64,
+    /// TxLINE's proof API selects the event by sequence, but V3's on-chain
+    /// payload commits to the event root rather than including the sequence.
+    pub observed_sequence: u64,
+    pub event_stat_root: [u8; 32],
+    pub stat_keys: Vec<u32>,
+    pub stat_values: Vec<i32>,
+    pub predicate_result: bool,
+    pub winning_side: PoolSide,
+    pub resulting_state: PoolState,
 }
 
 #[event]

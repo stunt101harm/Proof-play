@@ -5,12 +5,23 @@ use crate::{
     errors::ProofPlayError,
     events::{
         DemoOutcomeRecorded, PayoutClaimed, PoolCancelled, PoolClosed, PoolCreated, PoolJoined,
-        PoolLocked, PositionRefunded,
+        PoolLocked, PoolSettledFromTxline, PositionRefunded, SettlementConfigCreated,
     },
-    state::{CreatePoolParams, Pool, PoolSide, PoolState, Position},
+    state::{
+        CreatePoolParams, Pool, PoolSide, PoolState, Position, SettlementConfig,
+        SettlementConfigParams, SettlementRecord, SettlementRecordInput,
+    },
+    txline::{
+        daily_scores_root_address, validate_stat_v3, NDimensionalStrategy, StatValidationInputV3,
+        TXLINE_PROGRAM_ID,
+    },
 };
 
-pub fn create_pool(context: Context<CreatePool>, params: CreatePoolParams) -> Result<()> {
+pub fn create_pool(
+    context: Context<CreatePool>,
+    params: CreatePoolParams,
+    settlement: SettlementConfigParams,
+) -> Result<()> {
     let now = Clock::get()?.unix_timestamp;
     context.accounts.pool.initialize(
         context.accounts.creator.key(),
@@ -18,6 +29,13 @@ pub fn create_pool(context: Context<CreatePool>, params: CreatePoolParams) -> Re
         &params,
         now,
         context.bumps.pool,
+    )?;
+    context.accounts.settlement_config.initialize(
+        context.accounts.pool.key(),
+        params.condition_commitment,
+        params.compiler_version,
+        &settlement,
+        context.bumps.settlement_config,
     )?;
 
     emit!(PoolCreated {
@@ -31,6 +49,13 @@ pub fn create_pool(context: Context<CreatePool>, params: CreatePoolParams) -> Re
         compiler_version: params.compiler_version,
         condition_commitment: params.condition_commitment,
         demo_mode: params.demo_mode,
+    });
+    emit!(SettlementConfigCreated {
+        pool: context.accounts.pool.key(),
+        settlement_config: context.accounts.settlement_config.key(),
+        compiler_version: params.compiler_version,
+        condition_commitment: params.condition_commitment,
+        stat_keys: settlement.stat_keys,
     });
     Ok(())
 }
@@ -106,6 +131,99 @@ pub fn record_demo_outcome(
         remaining_pool_amount: context.accounts.pool.remaining_pool_amount,
         remaining_winning_stake: context.accounts.pool.remaining_winning_stake,
     });
+    Ok(())
+}
+
+pub fn settle_pool(
+    context: Context<SettlePool>,
+    payload: StatValidationInputV3,
+    strategy: NDimensionalStrategy,
+    observed_sequence: u64,
+) -> Result<()> {
+    require!(observed_sequence > 0, ProofPlayError::InvalidSequence);
+    require!(
+        context.accounts.vault.amount >= context.accounts.pool.remaining_pool_amount,
+        ProofPlayError::VaultBalanceMismatch
+    );
+
+    let pool_key = context.accounts.pool.key();
+    context.accounts.settlement_config.validate_payload(
+        pool_key,
+        &context.accounts.pool,
+        &payload,
+        &strategy,
+    )?;
+
+    let expected_daily_root = daily_scores_root_address(payload.ts)?;
+    require_keys_eq!(
+        context.accounts.daily_scores_root.key(),
+        expected_daily_root,
+        ProofPlayError::InvalidDailyScoresRoot
+    );
+    require_keys_eq!(
+        *context.accounts.daily_scores_root.owner,
+        TXLINE_PROGRAM_ID,
+        ProofPlayError::InvalidDailyScoresRootOwner
+    );
+
+    let predicate_result = validate_stat_v3(
+        &context.accounts.txline_program.to_account_info(),
+        &context.accounts.daily_scores_root.to_account_info(),
+        &payload,
+        &strategy,
+    )?;
+    let winning_side = if predicate_result {
+        PoolSide::Yes
+    } else {
+        PoolSide::No
+    };
+    context
+        .accounts
+        .pool
+        .record_verified_outcome(winning_side, observed_sequence)?;
+
+    let now = Clock::get()?.unix_timestamp;
+    context
+        .accounts
+        .settlement_record
+        .initialize(SettlementRecordInput {
+            pool: pool_key,
+            settlement_config: context.accounts.settlement_config.key(),
+            config: &context.accounts.settlement_config,
+            daily_scores_root: expected_daily_root,
+            payload: &payload,
+            observed_sequence,
+            predicate_result,
+            settled_at: now,
+            bump: context.bumps.settlement_record,
+        })?;
+
+    emit!(PoolSettledFromTxline {
+        pool: pool_key,
+        settlement_record: context.accounts.settlement_record.key(),
+        settler: context.accounts.settler.key(),
+        txline_program: TXLINE_PROGRAM_ID,
+        daily_scores_root: expected_daily_root,
+        proof_timestamp_ms: payload.ts,
+        observed_sequence,
+        event_stat_root: payload.event_stat_root,
+        stat_keys: payload.leaves.iter().map(|leaf| leaf.stat.key).collect(),
+        stat_values: payload.leaves.iter().map(|leaf| leaf.stat.value).collect(),
+        predicate_result,
+        winning_side,
+        resulting_state: context.accounts.pool.state,
+    });
+    if context.accounts.pool.state == PoolState::Closed {
+        emit!(PoolClosed {
+            pool: pool_key,
+            final_state: if predicate_result {
+                PoolState::SettledYes
+            } else {
+                PoolState::SettledNo
+            },
+            closed_at: now,
+        });
+    }
     Ok(())
 }
 
@@ -255,7 +373,7 @@ pub fn refund(context: Context<Refund>) -> Result<()> {
 }
 
 #[derive(Accounts)]
-#[instruction(params: CreatePoolParams)]
+#[instruction(params: CreatePoolParams, settlement: SettlementConfigParams)]
 pub struct CreatePool<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
@@ -276,6 +394,14 @@ pub struct CreatePool<'info> {
         token::authority = pool
     )]
     pub vault: Account<'info, TokenAccount>,
+    #[account(
+        init,
+        payer = creator,
+        space = 8 + SettlementConfig::INIT_SPACE,
+        seeds = [b"settlement_config", pool.key().as_ref()],
+        bump
+    )]
+    pub settlement_config: Account<'info, SettlementConfig>,
     pub token_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -346,6 +472,49 @@ pub struct RecordDemoOutcome<'info> {
         token::authority = pool
     )]
     pub vault: Account<'info, TokenAccount>,
+}
+
+#[derive(Accounts)]
+pub struct SettlePool<'info> {
+    #[account(mut)]
+    pub settler: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"pool", pool.creator.as_ref(), &pool.pool_id.to_le_bytes()],
+        bump = pool.bump
+    )]
+    pub pool: Account<'info, Pool>,
+    #[account(
+        seeds = [b"settlement_config", pool.key().as_ref()],
+        bump = settlement_config.bump,
+        has_one = pool @ ProofPlayError::SettlementConfigMismatch
+    )]
+    pub settlement_config: Account<'info, SettlementConfig>,
+    #[account(
+        init,
+        payer = settler,
+        space = 8 + SettlementRecord::INIT_SPACE,
+        seeds = [b"settlement", pool.key().as_ref()],
+        bump
+    )]
+    pub settlement_record: Account<'info, SettlementRecord>,
+    #[account(
+        seeds = [b"vault", pool.key().as_ref()],
+        bump,
+        token::authority = pool
+    )]
+    pub vault: Account<'info, TokenAccount>,
+    /// CHECK: The address and owner are derived from the proof timestamp and
+    /// verified before CPI; TxLINE verifies its account contents.
+    pub daily_scores_root: UncheckedAccount<'info>,
+    /// CHECK: Address and executable constraints pin the official TxLINE
+    /// devnet validation program.
+    #[account(
+        address = TXLINE_PROGRAM_ID @ ProofPlayError::InvalidTxlineProgram,
+        executable
+    )]
+    pub txline_program: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]

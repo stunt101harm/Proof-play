@@ -9,6 +9,7 @@ import {
   RAW_FIXTURE,
   RAW_ODDS,
   RAW_SCORE_PROOF,
+  RAW_SCORE_PROOF_V3,
   rawScore,
 } from "./fixtures/txline-samples";
 
@@ -81,6 +82,41 @@ describe("typed TxLINE adapter", () => {
       adapter.getScoreProof({ fixtureId: "42", sequence: 0, statKeys: [1] }),
     ).rejects.toMatchObject({ code: "TXLINE_INVALID_SEQUENCE" });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("normalizes the compact V3 multiproof into the exact on-chain payload", async () => {
+    const { adapter, fetchMock } = adapterWithResponses(() =>
+      Response.json(RAW_SCORE_PROOF_V3),
+    );
+    await expect(
+      adapter.getScoreProofV3({
+        fixtureId: "42",
+        sequence: 963,
+        statKeys: [1, 2],
+      }),
+    ).resolves.toMatchObject({
+      fixtureId: "42",
+      sequence: 963,
+      payload: {
+        fixtureSummary: { fixtureId: "42" },
+        leaves: [
+          { stat: { key: 1, period: 100 } },
+          { stat: { key: 2, period: 100 } },
+        ],
+        leafIndices: [32, 33],
+      },
+    });
+    expect(new URL(fetchMock.mock.calls[0]![0].toString()).pathname).toBe(
+      "/api/scores/stat-validation-v3",
+    );
+
+    await expect(
+      adapter.getScoreProofV3({
+        fixtureId: "42",
+        sequence: 963,
+        statKeys: [2, 1],
+      }),
+    ).rejects.toMatchObject({ code: "TXLINE_NORMALIZATION_ERROR" });
   });
 
   it("emits credential-free structured telemetry", async () => {
