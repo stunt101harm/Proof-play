@@ -1,0 +1,13 @@
+{
+  "verifiedAt": "2026-07-18T01:47:10.015Z",
+  "network": "devnet",
+  "keeperMode": "once",
+  "poolAddress": "3fCNRpakrJdsoaG46xFuHqMUK2YZM9FyvwuJediB5PhD",
+  "fixtureId": "18241006",
+  "observedPoolState": "closed",
+  "result": "alreadySettled",
+  "proofFetched": false,
+  "settlementSubmitted": false,
+  "outcomeMutation": false,
+  "logEvent": "keeper.pool-already-settled"
+}

@@ -18,7 +18,8 @@
     "validationMethod": "validateStatV3",
     "conditionCommitmentHex": "d2e7ea3af5761bfa010397b9f3ad89acdb579190666ac5a158106d3ccc771bf3",
     "statKeys": [1, 2, 7, 8],
-    "statement": "Participant 2 wins and total corners are at most 7."
+    "statement": "Participant 2 wins and total corners are at most 7.",
+    "legs": ["Participant 2 wins.", "Total corners are at most 7."]
   },
   "proof": {
     "timestampMs": 1784150064772,
@@ -65,7 +66,12 @@
     "claimSignature": "45tAsxmQu3SqNx3bCo1xq9Y1wxhYAZeL4TgWFPsreGvj9GPsiu5npZQMZw81ySsca5GZ4aQH7z1TTghvKGSsxtSX",
     "participantFundingSignature": "5jvUYXXrDzBURjbeZjVepvQLEmsnqPAUgw5RoD8eqbdQmxgajinsqt7ii6nBtaAFkzyHQ6ryrLfigRX4E9dpatbC",
     "finalState": "closed",
-    "vaultBalance": "0"
+    "vaultBalance": "0",
+    "yesAmount": "4000000",
+    "noAmount": "6000000",
+    "winningStake": "4000000",
+    "winnerClaimedAmount": "10000000",
+    "tokenDecimals": 6
   },
   "settlement": {
     "permissionlessSettler": "FxS7FgTfcn8wFBC96p2ngu7n7JG2ab4iCxn5dzBamhKp",

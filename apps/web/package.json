@@ -17,6 +17,8 @@
   "dependencies": {
     "@proof-play/condition-engine": "*",
     "@proof-play/domain": "*",
+    "@proof-play/replay": "*",
+    "@proof-play/receipt": "*",
     "@proof-play/txline": "*",
     "next": "16.2.10",
     "react": "19.2.6",
