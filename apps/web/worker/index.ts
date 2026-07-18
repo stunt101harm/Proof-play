@@ -4,6 +4,7 @@ import {
   handleImageOptimization,
 } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { withSecurityHeaders } from "../lib/security-headers";
 
 type AssetsBinding = {
   fetch(request: Request): Promise<Response>;
@@ -40,23 +41,25 @@ const worker = {
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-      return handleImageOptimization(
-        request,
-        {
-          fetchAsset: (path) =>
-            env.ASSETS.fetch(new Request(new URL(path, request.url))),
-          transformImage: async (body, { width, format, quality }) => {
-            const result = await env.IMAGES.input(body)
-              .transform(width > 0 ? { width } : {})
-              .output({ format, quality });
-            return result.response();
+      return withSecurityHeaders(
+        await handleImageOptimization(
+          request,
+          {
+            fetchAsset: (path) =>
+              env.ASSETS.fetch(new Request(new URL(path, request.url))),
+            transformImage: async (body, { width, format, quality }) => {
+              const result = await env.IMAGES.input(body)
+                .transform(width > 0 ? { width } : {})
+                .output({ format, quality });
+              return result.response();
+            },
           },
-        },
-        allowedWidths,
+          allowedWidths,
+        ),
       );
     }
 
-    return handler.fetch(request, env, context);
+    return withSecurityHeaders(await handler.fetch(request, env, context));
   },
 };
 

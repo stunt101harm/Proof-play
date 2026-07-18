@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { WalletProvider } from "@/components/wallet-provider";
@@ -31,7 +32,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <WalletProvider config={publicEnv}>{children}</WalletProvider>
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
+        <aside className="prototype-strip" aria-label="Prototype notice">
+          <strong>18+ hackathon prototype</strong>
+          <span>
+            Solana devnet only · demo tokens have no monetary value · no prizes
+            or real-money wagering
+          </span>
+          <Link href="/legal">Legal &amp; data notice</Link>
+        </aside>
+        <WalletProvider config={publicEnv}>
+          <div id="main-content" tabIndex={-1}>
+            {children}
+          </div>
+        </WalletProvider>
       </body>
     </html>
   );

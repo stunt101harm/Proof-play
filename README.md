@@ -15,6 +15,9 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 - [Anchor pool and escrow program](docs/pool-program.md)
 - [Replay, keeper, and Proof Receipt](docs/replay-keeper-receipt.md)
 - [Wallet creation and pool participation](docs/wallet-participation.md)
+- [Operations and failure runbook](docs/operations-runbook.md)
+- [Security, accessibility, and compliance](docs/security-compliance.md)
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
 - [Architecture decisions](docs/adr/README.md)
 
 ## Status
@@ -29,6 +32,8 @@ ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository
 - `/create/18241006` compiles a condition, estimates the transaction, and creates a real devnet pool with a supported wallet.
 - `/pools/<address>` verifies readable metadata against the on-chain commitment and exposes only valid join, claim, or refund actions.
 - `/receipt` presents the real TxLINE proof, Solana settlement, and payout calculation.
+- `/legal` publishes the 18+, devnet, no-value, independence, attribution, and TxLINE data-use safeguards.
+- `/api/health` exposes a credential-free web and integration readiness check.
 
 ## Prerequisites
 
@@ -74,6 +79,8 @@ tooling                   Repository validation scripts
 | `npm run typecheck`                                      | Typecheck every TypeScript workspace          |
 | `npm test`                                               | Check workspace boundaries and run unit tests |
 | `npm run test:rendered`                                  | Verify the built app server-renders           |
+| `npm run test:e2e`                                       | Run browser, keyboard, a11y, responsive tests |
+| `npm run security`                                       | Run secret, compliance, bundle, audit gates   |
 | `npm run txline:diagnose`                                | Check TxLINE devnet consistency and funding   |
 | `npm run txline:activate`                                | Subscribe and activate local TxLINE access    |
 | `npm run txline:recover`                                 | Recover activation for a confirmed subscribe  |
