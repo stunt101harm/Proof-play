@@ -2,6 +2,7 @@
 
 ## Submission links
 
+- Superteam track: <https://superteam.fun/earn/listing/prediction-markets-and-settlement>
 - Application: <https://proof-play-txline.peterclawbot.chatgpt.site>
 - Wallet-free Judge Demo: <https://proof-play-txline.peterclawbot.chatgpt.site/demo>
 - Verified Proof Receipt: <https://proof-play-txline.peterclawbot.chatgpt.site/receipt>

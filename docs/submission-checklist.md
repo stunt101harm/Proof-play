@@ -4,6 +4,7 @@ Deadline: **July 19, 2026 at 23:59 UTC**.
 
 ## Required links
 
+- [x] Target track: <https://superteam.fun/earn/listing/prediction-markets-and-settlement>
 - [x] Public repository: <https://github.com/stunt101harm/Proof-play>
 - [ ] Public application: <https://proof-play-txline.peterclawbot.chatgpt.site>
 - [x] Devnet program: <https://explorer.solana.com/address/AJwjCjk9sb9SWMiuLWDCDgnL6zFEENgnULfkCYaU5Ar?cluster=devnet>
