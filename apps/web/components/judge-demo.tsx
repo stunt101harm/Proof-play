@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useReducer, useState } from "react";
+import { useReducer, useState, useSyncExternalStore } from "react";
 
 import {
   ConditionBuilder,
@@ -32,6 +32,18 @@ function stageIndex(stage: DemoStage) {
   return stages.findIndex((candidate) => candidate.id === stage);
 }
 
+function subscribeToHydration() {
+  return () => undefined;
+}
+
+function getClientHydrationSnapshot() {
+  return true;
+}
+
+function getServerHydrationSnapshot() {
+  return false;
+}
+
 export function JudgeDemo() {
   const [state, dispatch] = useReducer(reduceDemoState, undefined, () =>
     initialDemoState(),
@@ -39,6 +51,11 @@ export function JudgeDemo() {
   const [condition, setCondition] = useState<ConfirmedCondition | null>(null);
   const [side, setSide] = useState<"yes" | "no">("yes");
   const [replayUnavailable, setReplayUnavailable] = useState(false);
+  const isInteractive = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
   const activeIndex = stageIndex(state.stage);
 
   function reset() {
@@ -119,6 +136,7 @@ export function JudgeDemo() {
           <button
             className="demo-match-card"
             type="button"
+            disabled={!isInteractive}
             onClick={() =>
               dispatch({
                 type: "selectFixture",

@@ -1,9 +1,11 @@
 import { SettlementKeeper, type KeeperRunOptions } from "./core";
+import { KeeperHealthMonitor, startKeeperHealthServer } from "./health";
 import { createKeeperDependencies } from "./runtime";
 
 type CliOptions = KeeperRunOptions & {
   watch: boolean;
   intervalMs: number;
+  healthPort?: number;
 };
 
 function readPositiveInteger(value: string | undefined, label: string) {
@@ -29,6 +31,8 @@ export function parseKeeperArgs(args: string[]): CliOptions {
         args[++index],
         "--max-attempts",
       );
+    } else if (argument === "--health-port") {
+      options.healthPort = readPositiveInteger(args[++index], "--health-port");
     } else {
       throw new Error(`Unknown keeper argument: ${argument}`);
     }
@@ -38,8 +42,16 @@ export function parseKeeperArgs(args: string[]): CliOptions {
 
 async function main() {
   const options = parseKeeperArgs(process.argv.slice(2));
+  options.healthPort ??= process.env.KEEPER_HEALTH_PORT
+    ? readPositiveInteger(process.env.KEEPER_HEALTH_PORT, "KEEPER_HEALTH_PORT")
+    : undefined;
+  if (!options.watch && options.healthPort) {
+    throw new Error("--health-port is only available with --watch.");
+  }
   const dependencies = await createKeeperDependencies();
+  const health = new KeeperHealthMonitor();
   const keeper = new SettlementKeeper(dependencies, (event) => {
+    health.recordEvent(event);
     process.stdout.write(`${JSON.stringify(event)}\n`);
   });
   if (!options.watch) {
@@ -54,11 +66,25 @@ async function main() {
   const controller = new AbortController();
   process.once("SIGINT", () => controller.abort());
   process.once("SIGTERM", () => controller.abort());
-  await keeper.watch({
-    intervalMs: options.intervalMs,
-    signal: controller.signal,
-    runOptions: options,
-  });
+  const healthServer = options.healthPort
+    ? await startKeeperHealthServer({
+        monitor: health,
+        port: options.healthPort,
+        host: process.env.KEEPER_HEALTH_HOST,
+      })
+    : null;
+  try {
+    await keeper.watch({
+      intervalMs: options.intervalMs,
+      signal: controller.signal,
+      runOptions: options,
+      onRunStart: () => health.recordRunStart(),
+      onRunComplete: (results) => health.recordRunComplete(results),
+      onRunError: () => health.recordRunFailure(),
+    });
+  } finally {
+    await healthServer?.close();
+  }
 }
 
 void main().catch((error: unknown) => {
@@ -70,3 +96,4 @@ void main().catch((error: unknown) => {
 });
 
 export * from "./core";
+export * from "./health";

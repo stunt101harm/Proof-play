@@ -409,13 +409,23 @@ export class SettlementKeeper {
     intervalMs: number;
     signal: AbortSignal;
     runOptions?: KeeperRunOptions;
+    onRunStart?: () => void;
+    onRunComplete?: (results: KeeperRunResult[]) => void;
+    onRunError?: (error: unknown) => void;
   }) {
     if (!Number.isSafeInteger(input.intervalMs) || input.intervalMs < 1_000) {
       throw new Error("Keeper watch interval must be at least 1000ms.");
     }
     const sleep = this.#dependencies.sleep ?? defaultSleep;
     while (!input.signal.aborted) {
-      await this.run(input.runOptions);
+      input.onRunStart?.();
+      try {
+        const results = await this.run(input.runOptions);
+        input.onRunComplete?.(results);
+      } catch (error) {
+        input.onRunError?.(error);
+        throw error;
+      }
       await sleep(input.intervalMs, input.signal);
     }
   }

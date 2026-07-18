@@ -20,8 +20,13 @@
     "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tsconfig.tooling.json",
     "test": "npm run workspace:check && npm run test:unit",
     "test:unit": "vitest run",
+    "test:e2e": "playwright test",
     "test:rendered": "npm run test:rendered --workspace=@proof-play/web",
     "security:client-bundle": "node tooling/check-client-secrets.mjs",
+    "security:secrets": "node tooling/check-repository-secrets.mjs",
+    "security:compliance": "node tooling/check-compliance.mjs",
+    "security:audit": "npm audit --omit=dev --audit-level=high",
+    "security": "npm run security:secrets && npm run security:compliance && npm run security:client-bundle && npm run security:audit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "workspace:check": "node tooling/check-workspace-graph.mjs",
@@ -36,9 +41,13 @@
     "program:verify": "node --import tsx tooling/verify-pool-lifecycle-devnet.ts",
     "program:verify-proof": "node --import tsx tooling/verify-proof-settlement-devnet.ts",
     "demo:fund": "node --import tsx tooling/fund-demo-wallet-devnet.ts",
-    "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run security:client-bundle && npm run test:rendered && npm run anchor:test"
+    "media:capture": "node tooling/capture-submission-media.mjs",
+    "media:video": "node tooling/record-submission-demo.mjs",
+    "check": "npm run format:check && npm run workspace:check && npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run security && npm run test:rendered && npm run test:e2e && npm run anchor:test"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
     "@solana/spl-token": "0.4.15",
     "@types/node": "22.19.19",
     "prettier": "3.9.5",

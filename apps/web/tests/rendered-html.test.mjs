@@ -47,7 +47,38 @@ test("server-renders the ProofPlay foundation", async () => {
   assert.match(html, /Prediction pools that settle with proof/i);
   assert.match(html, /TxLINE-powered settlement/i);
   assert.match(html, /No real-money wagering/i);
+  assert.match(html, /18\+ hackathon prototype/i);
+  assert.match(html, /Legal &amp; data notice/i);
   assert.doesNotMatch(html, /codex-preview|Starter Project|taking shape/i);
+});
+
+test("server-renders the legal and data-use safeguards", async () => {
+  const response = await render("/legal");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /No real value or prize/i);
+  assert.match(html, /not sponsored, endorsed, or affiliated/i);
+  assert.match(html, /does not publish a raw feed/i);
+  assert.match(html, /repository attribution file/i);
+});
+
+test("health response is credential-free and security hardened", async () => {
+  const response = await render("/api/health");
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  const body = await response.text();
+  assert.match(body, /"status":"ready"/i);
+  assert.match(body, /"network":"devnet"/i);
+  assert.doesNotMatch(body, /guestJwt|apiToken|privateKey/i);
+});
+
+test("unknown routes fail safely without inventing product state", async () => {
+  const response = await render("/not-a-real-proof-play-route");
+  assert.equal(response.status, 404);
+  const html = await response.text();
+  assert.match(html, /This ProofPlay route does not exist/i);
+  assert.match(html, /No pool, settlement, or TxLINE result was inferred/i);
 });
 
 test("server-renders the deterministic replay demo", async () => {
