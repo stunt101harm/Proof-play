@@ -18,7 +18,15 @@ Project planning is tracked in the [ProofPlay delivery epic](https://github.com/
 
 ## Status
 
-ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository includes the deployable web app, a deterministic TxLINE historical replay, a typed TxLINE adapter and condition compiler, a resilient settlement keeper, a human-readable Proof Receipt, and a devnet Anchor program with SPL-token escrow, TxLINE V3 proof-backed permissionless settlement, deterministic pari-mutuel claims, and cancellation refunds. Product features follow the child issues in the delivery epic.
+ProofPlay is being built for the 2026 TxLINE World Cup Hackathon. The repository includes a deployable match catalog and match center, a wallet-free Judge Demo, deterministic TxLINE historical replay, live SSE mode, a reusable no-code condition builder, a typed TxLINE adapter and condition compiler, a resilient settlement keeper, a human-readable Proof Receipt, and a devnet Anchor program with SPL-token escrow, TxLINE V3 proof-backed permissionless settlement, deterministic pari-mutuel claims, and cancellation refunds. Product features follow the child issues in the delivery epic.
+
+## Product routes
+
+- `/demo` runs the complete wallet-free judging path against checked devnet evidence.
+- `/fixtures` discovers covered normalized TxLINE fixtures with a transparent replay fallback.
+- `/matches/18241006` shows historical replay or live SSE, available odds, and the verified pool.
+- `/create/18241006` exercises the shared no-code condition builder; wallet-backed pool creation remains a separate participation milestone.
+- `/receipt` presents the real TxLINE proof, Solana settlement, and payout calculation.
 
 ## Prerequisites
 
